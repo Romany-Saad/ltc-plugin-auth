@@ -1,0 +1,6 @@
+database: __testing__cyber-crafts_cms-plugin-auth
+collectionPrefix: _ltc
+host: localhost
+port: 27017
+user:
+pass:

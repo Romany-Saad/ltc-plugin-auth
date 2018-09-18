@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "outDir": "./lib",
+    "rootDir": "./src",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "declaration": true,
+    "types": [
+      "node"
+    ],
+    "lib": [
+      "esnext"
+    ],
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "module": "commonjs",
+    "target": "es2015",
+    "allowSyntheticDefaultImports": true
+  },
+  "exclude": [
+    "./lib/",
+    "./__tests__/",
+    "**/*.gql"
+  ]
+}
