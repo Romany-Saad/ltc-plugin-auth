@@ -1,5 +1,5 @@
 {
-  "name": "ltc-plugin-cms-plugin-auth",
+  "name": "cms-plugin-auth",
   "version": "1.0.0",
   "author": "cyber-crafts",
   "description": "",
@@ -26,7 +26,9 @@
     "jwt-simple": "^0.5.1",
     "ltc-plugin-common": "git+ssh://git@bitbucket.org:cyber-crafts/ltc-plugin-common.git",
     "ltc-plugin-config": "git+ssh://git@bitbucket.org:cyber-crafts/ltc-plugin-config.git",
-    "ltc-plugin-mongo": "git+ssh://git@bitbucket.org:cyber-crafts/ltc-plugin-mongo.git"
+    "ltc-plugin-mongo": "git+ssh://git@bitbucket.org:cyber-crafts/ltc-plugin-mongo.git",
+    "ltc-plugin-mail": "git+ssh://git@bitbucket.org:cyber-crafts/ltc-plugin-mail.git",
+    "randexp": "^0.5.3"
   },
   "devDependencies": {
     "@types/jest": "^22.2.3",

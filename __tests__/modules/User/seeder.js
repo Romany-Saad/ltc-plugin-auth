@@ -2,12 +2,12 @@ const names = require("./../../../lib").names;
 const faker = require("./faker");
 const permissionSeeder = require('./../Permission/seeder');
 
-const userSeeder = async (app, numOfSeeds, password) => {
+const userSeeder = async (app, numOfSeeds, password, email = '') => {
     let permission = (await permissionSeeder(app, 1))[0];
     let fakes = [];
     const userRepo = app.get(names.AUTH_USERS_REPOSITORY);
     for(let i = 0; i < numOfSeeds; i++){
-        let fake = userRepo.parse(await faker(permission, password));
+        let fake = userRepo.parse(await faker(permission, password, email));
         fakes.push(fake)
     }
     let inserted = userRepo.insert(fakes);

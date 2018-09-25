@@ -7,11 +7,13 @@ import { names as mongoNames } from "ltc-plugin-mongo"
 import { Context } from "c2v"
 import { Permissions } from "./modules/Permission"
 import { Users } from "./modules/User"
+import { PasswordResets } from "./modules/PasswordReset"
 
 
 export const names = {
     AUTH_PERMISSIONS_REPOSITORY: Symbol(namer.resolve("auth", "permissions", "repository")),
     AUTH_USERS_REPOSITORY: Symbol(namer.resolve("auth", "users", "repository")),
+    AUTH_PASSWORD_RESET_REPOSITORY: Symbol(namer.resolve("auth", "passwordResets", "repository")),
 }
 
 export default class implements contracts.IPlugin {
@@ -38,6 +40,10 @@ export default class implements contracts.IPlugin {
     const users = new Users(connection.getClient(), `users`)
     container.bind<Users>(names.AUTH_USERS_REPOSITORY).toConstantValue(users)
     Context.bind(names.AUTH_USERS_REPOSITORY, users)
+
+    const passwordResets = new PasswordResets(connection.getClient(), `passwordResets`)
+    container.bind<PasswordResets>(names.AUTH_PASSWORD_RESET_REPOSITORY).toConstantValue(passwordResets)
+    Context.bind(names.AUTH_PASSWORD_RESET_REPOSITORY, passwordResets)
 
     resolvers(container)
 

@@ -8,7 +8,7 @@ import './schema'
 import { schemaComposer } from 'graphql-compose'
 import bcrypt = require('bcrypt')
 import { IStringKeyedObject } from "@lattice/core/lib/contracts"
-import jwt = require('jwt-simple');
+import jwt = require('jwt-simple')
 
 
 const transform = (item: User): object => {
@@ -21,7 +21,7 @@ const transform = (item: User): object => {
 const dataToModel = (data: any): any => {
     if (data.hasOwnProperty('password')) {
         return bcrypt.hash(data.password, 10)
-            .then(function(hash) {
+            .then(function (hash) {
                 // Store hash in your password DB.
                 data.password = hash
                 return data

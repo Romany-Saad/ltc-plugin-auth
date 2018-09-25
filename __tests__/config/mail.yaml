@@ -1,0 +1,6 @@
+type: smtp
+username: postmaster@sandboxb9b10833755d4f1fb08fa3d209ae0fe2.mailgun.org
+password: dfe9551e76b8c0e30137adfc98bea75e
+host: smtp.mailgun.org
+port: 465
+secure: true

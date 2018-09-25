@@ -50,7 +50,6 @@ describe("given schema is the GraphQlSchema object loaded with schemas from User
   it("should return User data on Mutation.changePassword()", async () => {
     const q = `mutation { changePassword ( id: "${instance.getId()}", newPassword: "654987ds")}`;
     const x = await graphql(schema, q);
-    console.log(JSON.stringify(x))
     expect(x.data.changePassword).toBe(true);
   });
 
