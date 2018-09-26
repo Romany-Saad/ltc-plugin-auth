@@ -1,7 +1,7 @@
 import App from "@lattice/core/lib/App"
 import { GraphQLResolveInfo } from "graphql"
 import { IModel } from "@lattice/core/lib/contracts"
-import { User,  Users } from "./"
+import { User, Users } from "./"
 import { merge } from "lodash"
 import { names } from "../../index"
 import './schema'
@@ -9,6 +9,8 @@ import { schemaComposer } from 'graphql-compose'
 import bcrypt = require('bcrypt')
 import { IStringKeyedObject } from "@lattice/core/lib/contracts"
 import jwt = require('jwt-simple')
+import { names as mailNames } from "ltc-plugin-mail"
+const RandExp = require('randexp')
 
 
 const transform = (item: User): object => {
@@ -34,11 +36,23 @@ const dataToModel = (data: any): any => {
     }
 
 }
-
+const resetDataToModel = async (app: App, email: string): Promise<any> => {
+    let pr: IStringKeyedObject = {}
+    let userRepo = app.get<Users>(names.AUTH_USERS_REPOSITORY)
+    let user = (await userRepo.find({email: email}))[0]
+    pr.userId = user.getId()
+    pr.secretCode = new RandExp(/^.{64}$/).gen()
+    pr.createdAt = new Date(Date.now())
+    pr.state = 'pending'
+    return pr
+}
 export default (container: App): void => {
 
     const repository = container
-        .get<Users>(names.AUTH_USERS_REPOSITORY);
+        .get<Users>(names.AUTH_USERS_REPOSITORY)
+
+    const resetRepo = container
+        .get<Users>(names.AUTH_PASSWORD_RESET_REPOSITORY)
 
     schemaComposer.Query.addFields({
         getUser: {
@@ -66,25 +80,24 @@ export default (container: App): void => {
         },
         login: {
             type: 'AuthedUser!',
-            args: {username: 'String!', password: 'String!' },
+            args: {email: 'String!', password: 'String!'},
             resolve: async (obj: any, args: any, context: any, info: GraphQLResolveInfo): Promise<any> => {
-                let user = (await repository.find({username: args.username}))[0];
-                let serializedUser:IStringKeyedObject = transform(user);
+                let user = (await repository.find({email: args.email}))[0]
+                let serializedUser: IStringKeyedObject = transform(user)
                 return bcrypt.compare(args.password, serializedUser.password)
                     .then((res: Boolean) => {
-                        if(res){
-                            let token = jwt.encode({userID: user.getId()}, 'LTC_SECRET');
+                        if (res) {
+                            let token = jwt.encode({userID: user.getId()}, 'LTC_SECRET')
                             let authedUser = {
                                 id: user.getId(),
-                                username: serializedUser.username,
                                 token: token,
                                 authorization: serializedUser.permissions
-                            };
+                            }
                             return authedUser
                         } else {
                             throw new Error('Invalid credentials.')
                         }
-                    });
+                    })
             }
         }
 
@@ -93,9 +106,11 @@ export default (container: App): void => {
     schemaComposer.Mutation.addFields({
         addUser: {
             type: 'User',
-            args: {input: 'NewUser!'},
-            resolve: async (obj: any, {input}: any, context: any, info: GraphQLResolveInfo): Promise<any> => {
-                const data = await dataToModel(input)
+            args: {email: 'String!', password: 'String!'},
+            resolve: async (obj: any, {email, password}: any, context: any, info: GraphQLResolveInfo): Promise<any> => {
+                const data = await dataToModel({email: email, password: password})
+                data.permissions = []
+                data.status = 'active'
                 let newUser = repository.parse(data)
                 let validation
                 try {
@@ -124,7 +139,7 @@ export default (container: App): void => {
                 }
             }
         },
-        updateUser: {
+        /*updateUser: {
             type: 'User!',
             args: {id: 'ID!', input: 'UserPatch!'},
             resolve: async (obj: any, {id, input}: any, context: any, info: GraphQLResolveInfo): Promise<any> => {
@@ -140,7 +155,7 @@ export default (container: App): void => {
                     throw new Error("no User with this id was found")
                 }
             }
-        },
+        },*/
         changePermissions: {
             type: 'User!',
             args: {id: 'ID!', permissions: '[String!]!'},
@@ -191,6 +206,102 @@ export default (container: App): void => {
                     throw new Error("no User with this id was found")
                 }
             }
-        }
+        },
+        resetPassword: {
+            type: 'Boolean!',
+            args: {email: 'String!'},
+            resolve: async (obj: any, {email}: any, context: any, info: GraphQLResolveInfo): Promise<any> => {
+                const data = await resetDataToModel(container, email)
+                let newPasswordReset: any = resetRepo.parse(data)
+                let validation
+                try {
+                    validation = await
+                        newPasswordReset.selfValidate()
+                } catch (e) {
+                    console.log(e)
+                }
+                if (validation.success) {
+                    newPasswordReset = (await resetRepo.insert([newPasswordReset]))[0]
+                    let transporter: any = container.get(mailNames.MAIL_TRANSPORTER_SERVICE)
+                    let mailOptions = {
+                        from: 'admin', // sender address
+                        to: email, // list of receivers
+                        subject: 'Hassan Kutbi - Password reset request', // Subject line
+                        // html: '<b>Hello world?</b>' // html body
+                        text: newPasswordReset.secretCode // html body
+                    }
+                    return transporter.sendMail(mailOptions)
+                        .then((info: any) => {
+                            if (info.accepted.length > 0) {
+                                return true
+                            }
+                        })
+                        .catch((err: any) => {
+                            throw new Error('Error sending verification email.')
+                        })
+                    // return transform(newPasswordReset)
+                } else {
+                    throw new Error(JSON.stringify(validation.errors[0]))
+                }
+            }
+        },
+        verifyResetPassword: {
+            type: 'Boolean!',
+            args: {id: 'ID!', code: 'String!', password: 'String!'},
+            resolve: async (obj: any, {id, code, password}: any, context: any, info: GraphQLResolveInfo): Promise<any> => {
+                let instance: any = (await resetRepo.findByIds([id]))[0]
+                let userRepo = container.get<Users>(names.AUTH_USERS_REPOSITORY)
+
+                if (instance.data.secretCode === code) {
+                    let rpInstanceData: any = merge(transform(instance), {state: 'processed'})
+                    instance.set(rpInstanceData)
+                    let updatedRp = resetRepo.update([instance])
+
+                    let user: any = (await userRepo.findByIds([rpInstanceData.userId]))[0]
+                    let newPassword  = await bcrypt.hash(password, 10)
+                    let userData: any = merge(transform(user), {password: newPassword})
+                    user.set(userData)
+                    let updatedUser = userRepo.update([user])
+                    return Promise.all([updatedRp, updatedUser])
+                        .then(res => {
+                            return true
+                        })
+                        .catch(err => {
+                            return false
+                        })
+                } else {
+                    return false
+                }
+            }
+        },
+        register: {
+            type: 'AuthedUser',
+            args: {email: 'String!', password: 'String!'},
+            resolve: async (obj: any, {email, password}: any, context: any, info: GraphQLResolveInfo): Promise<any> => {
+                const data = await dataToModel({email: email, password: password})
+                data.permissions = []
+                data.status = 'active'
+                let newUser: any = repository.parse(data)
+                let validation
+                try {
+                    validation = await
+                        newUser.selfValidate()
+                } catch (e) {
+                    console.log(e)
+                }
+                if (validation.success) {
+                    newUser = (await repository.insert([newUser]))[0]
+                    let token = jwt.encode({userID: newUser.getId()}, 'LTC_SECRET')
+                    let authedUser = {
+                        id: newUser.getId(),
+                        token: token,
+                        authorization: newUser.data.permissions
+                    }
+                    return authedUser
+                } else {
+                    throw new Error(JSON.stringify(validation.errors[0]))
+                }
+            }
+        },
     })
 }

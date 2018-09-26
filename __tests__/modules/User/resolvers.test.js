@@ -20,20 +20,21 @@ beforeAll(async () => {
 describe("given schema is the GraphQlSchema object loaded with schemas from User plugin", () => {
 
   it("should insert a User if data is valid", async () => {
-    const data = fake(permission, '123456sd');
-    const q = `mutation AddUser($data: NewUser!) { addUser ( input: $data) { id , email } }`;
-    const x = await graphql(schema, q, null, null, { data });
+    const data = fake('123456sd');
+    const q = `mutation AddUser($email: String!, $password: String!) { addUser ( email: $email, password: $password) { id , email } }`;
+      console.log(data)
+    const x = await graphql(schema, q, null, null, data);
     expect(x).toHaveProperty("data.addUser.email");
     expect(x).toHaveProperty("data.addUser.id");
   });
 
-  it("should return User data on Mutation.updateUser()", async () => {
+ /* it("should return User data on Mutation.updateUser()", async () => {
     const q = `mutation { updateUser ( id: "${instance.getId()}", input: { email: "test@exampmle.com" }){ id, email }}`;
     const x = await graphql(schema, q);
     expect(x).toHaveProperty("data.updateUser.id");
     expect(x).toHaveProperty("data.updateUser.email", "test@exampmle.com");
   });
-
+*/
   it("should return User data on Mutation.changePermissions()", async () => {
     const q = `mutation { changePermissions ( id: "${instance.getId()}", permissions: ["test"]){ id, permissions }}`;
     const x = await graphql(schema, q);
