@@ -22,7 +22,6 @@ describe("given schema is the GraphQlSchema object loaded with schemas from User
   it("should insert a User if data is valid", async () => {
     const data = fake('123456sd');
     const q = `mutation AddUser($email: String!, $password: String!) { addUser ( email: $email, password: $password) { id , email } }`;
-      console.log(data)
     const x = await graphql(schema, q, null, null, data);
     expect(x).toHaveProperty("data.addUser.email");
     expect(x).toHaveProperty("data.addUser.id");
