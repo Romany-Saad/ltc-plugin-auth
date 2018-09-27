@@ -91,7 +91,8 @@ export default (container: App): void => {
                             let authedUser: any = {
                                 id: user.getId(),
                                 token: token,
-                                authorization: serializedUser.permissions
+                                permissions: user.data.permissions,
+                                email: user.data.email
                             }
                             if(user.data.name) {
                                 authedUser.name = user.data.name
@@ -298,7 +299,8 @@ export default (container: App): void => {
                     let authedUser: any = {
                         id: newUser.getId(),
                         token: token,
-                        authorization: newUser.data.permissions
+                        permissions: newUser.data.permissions,
+                        email: newUser.data.email
                     }
                     if(newUser.data.name) {
                         authedUser.name = newUser.data.name

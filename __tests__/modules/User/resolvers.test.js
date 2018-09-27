@@ -20,13 +20,28 @@ beforeAll(async () => {
 describe("given schema is the GraphQlSchema object loaded with schemas from User plugin", () => {
 
   it("should insert a User if data is valid", async () => {
-    const data = fake('123456sd', null);
+    const data = await fake('123456sd', null);
     const q = `mutation AddUser($data: NewUser!) { addUser (input: $data) { id , email } }`;
-    console.log(data)
     const x = await graphql(schema, q, null, null, {data});
     expect(x).toHaveProperty("data.addUser.email");
     expect(x).toHaveProperty("data.addUser.id");
   });
+
+  it("should register a User if data is valid and returns AuthedUser", async () => {
+    const data = await fake('123456sd', null);
+    const q = `mutation register($data: NewUser!) { register (input: $data) { id , email, permissions } }`;
+    const x = await graphql(schema, q, null, null, {data});
+    expect(x).toHaveProperty("data.register.email");
+    expect(x).toHaveProperty("data.register.id");
+  });
+
+    it("should login a User if data is valid and returns AuthedUser", async () => {
+        const q = `query login($email: String!, $password: String!) { login (email: $email, password: $password) { id , email, permissions } }`;
+        const x = await graphql(schema, q, null, null, {email: instance.data.email, password: '123456sd'});
+        console.log(instance.data.email)
+        expect(x).toHaveProperty("data.login.email");
+        expect(x).toHaveProperty("data.login.id");
+    });
 
  /* it("should return User data on Mutation.updateUser()", async () => {
     const q = `mutation { updateUser ( id: "${instance.getId()}", input: { email: "test@exampmle.com" }){ id, email }}`;
@@ -35,7 +50,7 @@ describe("given schema is the GraphQlSchema object loaded with schemas from User
     expect(x).toHaveProperty("data.updateUser.email", "test@exampmle.com");
   });
 */
-  it("should return User data on Mutation.changePermissions()", async () => {
+  it("should return User data on Mutation.updateUser()", async () => {
     const q = `mutation { updateUser ( id: "${instance.getId()}", input: {name: "test"}){ id, name }}`;
     const x = await graphql(schema, q);
     expect(x).toHaveProperty("data.updateUser.id");

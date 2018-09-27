@@ -17,6 +17,7 @@ type AuthedUser {
     name: String
     token: String!
     permissions: [String!]!
+    email: String!
 }`)
 
 InputTypeComposer.create(`
