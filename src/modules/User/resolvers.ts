@@ -82,16 +82,19 @@ export default (container: App): void => {
             type: 'AuthedUser!',
             args: {email: 'String!', password: 'String!'},
             resolve: async (obj: any, args: any, context: any, info: GraphQLResolveInfo): Promise<any> => {
-                let user = (await repository.find({email: args.email}))[0]
+                let user: any = (await repository.find({email: args.email}))[0]
                 let serializedUser: IStringKeyedObject = transform(user)
                 return bcrypt.compare(args.password, serializedUser.password)
                     .then((res: Boolean) => {
                         if (res) {
                             let token = jwt.encode({userID: user.getId()}, 'LTC_SECRET')
-                            let authedUser = {
+                            let authedUser: any = {
                                 id: user.getId(),
                                 token: token,
                                 authorization: serializedUser.permissions
+                            }
+                            if(user.data.name) {
+                                authedUser.name = user.data.name
                             }
                             return authedUser
                         } else {
@@ -106,9 +109,9 @@ export default (container: App): void => {
     schemaComposer.Mutation.addFields({
         addUser: {
             type: 'User',
-            args: {email: 'String!', password: 'String!'},
-            resolve: async (obj: any, {email, password}: any, context: any, info: GraphQLResolveInfo): Promise<any> => {
-                const data = await dataToModel({email: email, password: password})
+            args: {input: 'NewUser!'},
+            resolve: async (obj: any, {input}: any, context: any, info: GraphQLResolveInfo): Promise<any> => {
+                const data = await dataToModel(input)
                 data.permissions = []
                 data.status = 'active'
                 let newUser = repository.parse(data)
@@ -156,14 +159,14 @@ export default (container: App): void => {
                 }
             }
         },*/
-        changePermissions: {
+        updateUser: {
             type: 'User!',
-            args: {id: 'ID!', permissions: '[String!]!'},
-            resolve: async (obj: any, {id, permissions}: any, context: any, info: GraphQLResolveInfo): Promise<any> => {
+            args: {id: 'ID!', input: 'UserPatch!'},
+            resolve: async (obj: any, {id, input}: any, context: any, info: GraphQLResolveInfo): Promise<any> => {
                 const items = (await repository.findByIds([id]))
                 if (items.length > 0) {
                     const item = items[0]
-                    const data = merge(transform(items[0]), {permissions: permissions})
+                    const data = merge(transform(items[0]), input)
                     item.set(await dataToModel(data))
                     if (await repository.update([item])) {
                         return transform(item)
@@ -276,9 +279,9 @@ export default (container: App): void => {
         },
         register: {
             type: 'AuthedUser',
-            args: {email: 'String!', password: 'String!'},
-            resolve: async (obj: any, {email, password}: any, context: any, info: GraphQLResolveInfo): Promise<any> => {
-                const data = await dataToModel({email: email, password: password})
+            args: {input: 'NewUser!'},
+            resolve: async (obj: any, {input}: any, context: any, info: GraphQLResolveInfo): Promise<any> => {
+                const data = await dataToModel(input)
                 data.permissions = []
                 data.status = 'active'
                 let newUser: any = repository.parse(data)
@@ -292,10 +295,13 @@ export default (container: App): void => {
                 if (validation.success) {
                     newUser = (await repository.insert([newUser]))[0]
                     let token = jwt.encode({userID: newUser.getId()}, 'LTC_SECRET')
-                    let authedUser = {
+                    let authedUser: any = {
                         id: newUser.getId(),
                         token: token,
                         authorization: newUser.data.permissions
+                    }
+                    if(newUser.data.name) {
+                        authedUser.name = newUser.data.name
                     }
                     return authedUser
                 } else {

@@ -7,16 +7,30 @@ type User {
     password: String!
     status: String!
     permissions: [String]
+    name: String
 }`)
 
 
 TypeComposer.create(`
 type AuthedUser {
     id: ID!
+    name: String
     token: String!
     permissions: [String!]!
 }`)
 
+InputTypeComposer.create(`
+input NewUser {
+    email: String!
+    password: String!
+    name: String
+}`)
+
+InputTypeComposer.create(`
+input UserPatch {
+    name: String
+    permissions: [String]
+}`)
 
 InputTypeComposer.create(`
 input UserCount {
@@ -24,4 +38,5 @@ input UserCount {
     password: String!
     status: String!
     permissions: [String]
+    name: String
 }`)

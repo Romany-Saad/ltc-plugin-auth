@@ -10,6 +10,7 @@ export default class extends BaseModel {
       email: c2v.str.email(),
       password: c2v.str,
       status: c2v.str.in('pending', 'active', 'banned'),
-      permissions: c2v.arr.attach(arrayExists(names.AUTH_PERMISSIONS_REPOSITORY, 'permissions', 'name'))
+      permissions: c2v.arr.attach(arrayExists(names.AUTH_PERMISSIONS_REPOSITORY, 'permissions', 'name')),
+      name: c2v.str.maxLength(32).minLength(2)
   })
 }

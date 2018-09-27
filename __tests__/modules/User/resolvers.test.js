@@ -20,9 +20,10 @@ beforeAll(async () => {
 describe("given schema is the GraphQlSchema object loaded with schemas from User plugin", () => {
 
   it("should insert a User if data is valid", async () => {
-    const data = fake('123456sd');
-    const q = `mutation AddUser($email: String!, $password: String!) { addUser ( email: $email, password: $password) { id , email } }`;
-    const x = await graphql(schema, q, null, null, data);
+    const data = fake('123456sd', null);
+    const q = `mutation AddUser($data: NewUser!) { addUser (input: $data) { id , email } }`;
+    console.log(data)
+    const x = await graphql(schema, q, null, null, {data});
     expect(x).toHaveProperty("data.addUser.email");
     expect(x).toHaveProperty("data.addUser.id");
   });
@@ -35,10 +36,10 @@ describe("given schema is the GraphQlSchema object loaded with schemas from User
   });
 */
   it("should return User data on Mutation.changePermissions()", async () => {
-    const q = `mutation { changePermissions ( id: "${instance.getId()}", permissions: ["test"]){ id, permissions }}`;
+    const q = `mutation { updateUser ( id: "${instance.getId()}", input: {name: "test"}){ id, name }}`;
     const x = await graphql(schema, q);
-    expect(x).toHaveProperty("data.changePermissions.id");
-    expect(x).toHaveProperty("data.changePermissions.permissions", ["test"]);
+    expect(x).toHaveProperty("data.updateUser.id");
+    expect(x).toHaveProperty("data.updateUser.name", "test");
   });
 
   it("should return User data on Mutation.changeEmail()", async () => {
