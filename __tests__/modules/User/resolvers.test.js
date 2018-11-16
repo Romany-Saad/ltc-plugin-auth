@@ -6,8 +6,9 @@ const names = require("../../../lib/index").names;
 const { schemaComposer } = require('graphql-compose');
 const seeder = require('./seeder');
 const permissionSeeder = require('./../Permission/seeder');
+const Auth = require('./../../../lib/auth').default;
 
-let app, schema, repository, instance, permission;
+let app, schema, repository, instance, permission, token;
 
 beforeAll(async () => {
   app = await registerPluginsAndInitApp();
@@ -36,20 +37,18 @@ describe("given schema is the GraphQlSchema object loaded with schemas from User
   });
 
     it("should login a User if data is valid and returns AuthedUser", async () => {
-        const q = `query login($email: String!, $password: String!) { login (email: $email, password: $password) { id , email, permissions } }`;
+        const q = `query login($email: String!, $password: String!) { login (email: $email, password: $password) { id , email, permissions, token } }`;
         const x = await graphql(schema, q, null, null, {email: instance.data.email, password: '123456sd'});
-        console.log(instance.data.email)
+        token = x.data.login.token
         expect(x).toHaveProperty("data.login.email");
         expect(x).toHaveProperty("data.login.id");
     });
 
- /* it("should return User data on Mutation.updateUser()", async () => {
-    const q = `mutation { updateUser ( id: "${instance.getId()}", input: { email: "test@exampmle.com" }){ id, email }}`;
-    const x = await graphql(schema, q);
-    expect(x).toHaveProperty("data.updateUser.id");
-    expect(x).toHaveProperty("data.updateUser.email", "test@exampmle.com");
-  });
-*/
+    it("should retrieve authed user data from authentication class", async () => {
+        let authed = new Auth(app, `Bearer ${token}`);
+        expect(authed.getAuthedUser()).toHaveProperty("userId");
+    });
+
   it("should return User data on Mutation.updateUser()", async () => {
     const q = `mutation { updateUser ( id: "${instance.getId()}", input: {name: "test"}){ id, name }}`;
     const x = await graphql(schema, q);

@@ -87,7 +87,7 @@ export default (container: App): void => {
                 return bcrypt.compare(args.password, serializedUser.password)
                     .then((res: Boolean) => {
                         if (res) {
-                            let token = jwt.encode({userID: user.getId()}, 'LTC_SECRET')
+                            let token = jwt.encode({userId: user.getId()}, 'LTC_CMS_SECRET')
                             let authedUser: any = {
                                 id: user.getId(),
                                 token: token,
@@ -295,7 +295,7 @@ export default (container: App): void => {
                 }
                 if (validation.success) {
                     newUser = (await repository.insert([newUser]))[0]
-                    let token = jwt.encode({userID: newUser.getId()}, 'LTC_SECRET')
+                    let token = jwt.encode({userId: newUser.getId()}, 'LTC_SECRET')
                     let authedUser: any = {
                         id: newUser.getId(),
                         token: token,

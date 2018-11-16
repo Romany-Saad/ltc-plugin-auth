@@ -3,7 +3,7 @@ import { GraphQLResolveInfo } from "graphql"
 import { IModel } from "@lattice/core/lib/contracts"
 import { Permission,  Permissions } from "./"
 import { merge } from "lodash"
-import { names } from "../../index";
+import { names } from "../../index"
 import './schema'
 import { schemaComposer } from 'graphql-compose'
 
@@ -21,7 +21,7 @@ const dataToModel = (data: any): any => {
 export default (container: App): void => {
 
   const repository = container
-    .get<Permissions>(names.AUTH_PERMISSIONS_REPOSITORY);
+    .get<Permissions>(names.AUTH_PERMISSIONS_REPOSITORY)
 
     schemaComposer.Query.addFields({
       getPermission: {
