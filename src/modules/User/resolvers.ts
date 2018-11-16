@@ -87,7 +87,7 @@ export default (container: App): void => {
                 return bcrypt.compare(args.password, serializedUser.password)
                     .then((res: Boolean) => {
                         if (res) {
-                            let token = jwt.encode({userId: user.getId()}, 'LTC_CMS_SECRET')
+                            let token = jwt.encode({userId: user.getId()}, container.config().get('auth').secret)
                             let authedUser: any = {
                                 id: user.getId(),
                                 token: token,
@@ -143,23 +143,6 @@ export default (container: App): void => {
                 }
             }
         },
-        /*updateUser: {
-            type: 'User!',
-            args: {id: 'ID!', input: 'UserPatch!'},
-            resolve: async (obj: any, {id, input}: any, context: any, info: GraphQLResolveInfo): Promise<any> => {
-                const items = (await repository.findByIds([id]))
-                if (items.length > 0) {
-                    const item = items[0]
-                    const data = merge(transform(items[0]), input)
-                    item.set(await dataToModel(data))
-                    if (await repository.update([item])) {
-                        return transform(item)
-                    }
-                } else {
-                    throw new Error("no User with this id was found")
-                }
-            }
-        },*/
         updateUser: {
             type: 'User!',
             args: {id: 'ID!', input: 'UserPatch!'},
@@ -295,7 +278,7 @@ export default (container: App): void => {
                 }
                 if (validation.success) {
                     newUser = (await repository.insert([newUser]))[0]
-                    let token = jwt.encode({userId: newUser.getId()}, 'LTC_SECRET')
+                    let token = jwt.encode({userId: newUser.getId()}, container.config().get('auth').secret)
                     let authedUser: any = {
                         id: newUser.getId(),
                         token: token,

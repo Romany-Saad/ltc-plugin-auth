@@ -10,7 +10,6 @@ export default class Auth {
 
     constructor (container: App, authorizaionHeader: string) {
         this.app = container
-        console.log(container.config().get('auth').secret)
         this.authorizationData = jwt.decode(this.getTokenFromHeader(authorizaionHeader), container.config().get('auth').secret)
     }
 
