@@ -1,4 +1,4 @@
-import App from "@lattice/core/lib/App"
+import App from "@lattice/core"
 import { resolvers as UserResolvers } from "../modules/User"
 import { resolvers as PermissionResolvers } from "../modules/Permission"
 import { resolvers as PasswordResetResolvers } from "../modules/PasswordReset"

@@ -1,6 +1,5 @@
-import App from "@lattice/core/lib/App"
+import App from "@lattice/core"
 import { GraphQLResolveInfo } from "graphql"
-import { IModel } from "@lattice/core/lib/contracts"
 import { User, Users } from "./"
 import { merge } from "lodash"
 import { names } from "../../index"
