@@ -20,7 +20,7 @@ const transform = (item: User): object => {
 }
 
 const dataToModel = (data: any): any => {
-    if (data.hasOwnProperty('password')) {
+    if (data.password) {
         return bcrypt.hash(data.password, 10)
             .then(function (hash) {
                 // Store hash in your password DB.
