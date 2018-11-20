@@ -1,6 +1,6 @@
 import { TypeComposer, InputTypeComposer } from "graphql-compose"
 
-TypeComposer.create(`
+export const UserTC = TypeComposer.create(`
 type User {
     id: ID!
     email: String!

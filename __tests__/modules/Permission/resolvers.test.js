@@ -18,19 +18,26 @@ beforeAll(async () => {
 
 describe("given schema is the GraphQlSchema object loaded with schemas from Permission plugin", () => {
 
+  /*
   it("should insert a Permission if data is valid", async () => {
     const data = fake();
     const q = `mutation AddPermission($data: NewPermission!) { addPermission ( input: $data) { id , name } }`;
     const x = await graphql(schema, q, null, null, { data });
     expect(x).toHaveProperty("data.addPermission.name");
     expect(x).toHaveProperty("data.addPermission.id");
-  });
+  });*/
 
-  it("should return Permission data on Mutation.updatePermission()", async () => {
-    const q = `mutation { updatePermission ( id: "${instance.getId()}", input: { name: "test" }){ id, name }}`;
+  it("should return Permission data on Mutation.enablePermission()", async () => {
+    const q = `mutation { enablePermission ( id: "${instance.getId()}"){ id, name, protected }}`;
     const x = await graphql(schema, q);
-    expect(x).toHaveProperty("data.updatePermission.id");
-    expect(x).toHaveProperty("data.updatePermission.name", "test");
+    expect(x).toHaveProperty("data.enablePermission.id");
+    expect(x).toHaveProperty("data.enablePermission.protected", true);
+  });
+  it("should return Permission data on Mutation.disablePermission()", async () => {
+    const q = `mutation { disablePermission ( id: "${instance.getId()}"){ id, name, protected }}`;
+    const x = await graphql(schema, q);
+    expect(x).toHaveProperty("data.disablePermission.id");
+    expect(x).toHaveProperty("data.disablePermission.protected", false);
   });
 
   it("should return a list of Permissions on Query.getPermissions()", async () => {

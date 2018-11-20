@@ -1,39 +1,32 @@
 import { TypeComposer, InputTypeComposer } from "graphql-compose"
 
-TypeComposer.create(`
+export const PermissionTC = TypeComposer.create(`
 type Permission {
     id: ID!
     name: String!
+    endpoint: String!
+    protected: Boolean!
 }`)
+/*
 
 InputTypeComposer.create(`
 input NewPermission {
     name: String!
-
+    endpoint: String!
+    protected: Boolean!
 }`)
 
 InputTypeComposer.create(`
 input PermissionPatch {
     name: String
-
+    endpoint: String
+    protected: Boolean
 }`)
+*/
 
 InputTypeComposer.create(`
 input PermissionCount {
     name: String
+    endpoint: String
+    protected: Boolean
 }`)
-
-/*
-
-extend type Query {
-    getPermissions: [Permission!]!
-    getPermission(id: ID!): [Permission!]!
-    countPermissions(input: PermissionCount): Int!
-}
-
-extend type Mutation {
-    addPermission(input: NewPermission): Permission!
-    updatePermission(id: ID!, input: PermissionPatch): Permission!
-    deletePermission(id: ID!): Boolean!
-}
-*/
