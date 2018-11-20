@@ -8,7 +8,8 @@ import { Context } from "c2v"
 import { Permissions } from "./modules/Permission"
 import { Users } from "./modules/User"
 import { PasswordResets } from "./modules/PasswordReset"
-
+import { names as coreNames } from '@lattice/core'
+import { initPermissions } from './auth/init-permissions'
 
 export const names = {
     AUTH_PERMISSIONS_REPOSITORY: Symbol(namer.resolve("auth", "permissions", "repository")),
@@ -46,6 +47,13 @@ export default class implements contracts.IPlugin {
     Context.bind(names.AUTH_PASSWORD_RESET_REPOSITORY, passwordResets)
 
     resolvers(container)
+
+    container.emitter.on(coreNames.EV_PLUGINS_LOADED, (items: any) => {
+      initPermissions(container)
+        .catch(err => {
+          throw new Error(err)
+        })
+    })
 
   }
 
