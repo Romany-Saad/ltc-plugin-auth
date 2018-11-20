@@ -6,6 +6,7 @@ type Permission {
     name: String!
     endpoint: String!
     protected: Boolean!
+    type: String!
 }`)
 /*
 
@@ -26,6 +27,7 @@ input PermissionPatch {
 
 InputTypeComposer.create(`
 input PermissionCount {
+    type: String
     name: String
     endpoint: String
     protected: Boolean
