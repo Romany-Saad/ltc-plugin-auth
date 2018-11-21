@@ -13,7 +13,8 @@ export const initPermissions = async (app: App) => {
   // get all endpoints from plugins
   let queryEndpoints = schemaComposer.rootQuery().getFields()
   let mutationEndpoints = schemaComposer.rootMutation().getFields()
-  let subscriptionEndpoints = schemaComposer.rootSubscription().getFields()
+  // TODO: find a workaround to add subscriptions
+  // let subscriptionEndpoints = schemaComposer.Subscription.getFields()
   // get all the endpoints that doesn't exist in db
   let newEndpoints = []
   for (let endpoint in queryEndpoints) {
@@ -36,7 +37,8 @@ export const initPermissions = async (app: App) => {
       }))
     }
   }
-  for (let endpoint in subscriptionEndpoints) {
+  /*for (let endpoint in subscriptionEndpoints) {
+    console.log(endpoint)
     if (databaseEndpoints.indexOf(endpoint) === -1) {
       newEndpoints.push(permissionsRepo.parse({
         endpoint: endpoint,
@@ -45,7 +47,7 @@ export const initPermissions = async (app: App) => {
         type: 'subscription'
       }))
     }
-  }
+  }*/
   if (newEndpoints.length) {
     permissionsRepo.insert(newEndpoints)
       .catch(err => {

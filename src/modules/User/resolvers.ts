@@ -89,25 +89,27 @@ export default (container: App): void => {
         args: {email: 'String!', password: 'String!'},
         resolve: async ({obj, args, context, info}: ResolveParams<App, any>): Promise<any> => {
             let user: any = (await repository.find({email: args.email}))[0]
-            let serializedUser: IStringKeyedObject = transform(user)
-            return bcrypt.compare(args.password, serializedUser.password)
+            if(user) {
+              let serializedUser: IStringKeyedObject = transform(user)
+              return bcrypt.compare(args.password, serializedUser.password)
                 .then((res: Boolean) => {
-                    if (res) {
-                        let token = jwt.encode({userId: user.getId()}, container.config().get('auth').secret)
-                        let authedUser: any = {
-                            id: user.getId(),
-                            token: token,
-                            permissions: user.data.permissions,
-                            email: user.data.email
-                        }
-                        if (user.data.name) {
-                            authedUser.name = user.data.name
-                        }
-                        return authedUser
-                    } else {
-                        throw new Error('Invalid credentials.')
+                  if (res) {
+                    let token = jwt.encode({userId: user.getId()}, container.config().get('auth').secret)
+                    let authedUser: any = {
+                      id: user.getId(),
+                      token: token,
+                      permissions: user.data.permissions,
+                      email: user.data.email
                     }
+                    if (user.data.name) {
+                      authedUser.name = user.data.name
+                    }
+                    return authedUser
+                  } else {
+                    throw new Error('Invalid credentials.')
+                  }
                 })
+            }
         }
     })
 
