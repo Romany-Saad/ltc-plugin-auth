@@ -1,4 +1,4 @@
-import { TypeComposer, InputTypeComposer } from "graphql-compose"
+import { TypeComposer, InputTypeComposer } from 'graphql-compose'
 
 TypeComposer.create(`
 type PasswordReset {

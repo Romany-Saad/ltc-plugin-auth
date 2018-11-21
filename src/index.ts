@@ -1,25 +1,25 @@
-import App, { contracts } from "@lattice/core"
-import { IConfiguration } from "@lattice/core/lib/contracts"
-import resolvers from "./schema/resolvers"
-import Connection from "ltc-plugin-mongo/lib/Connection"
-import { namer } from "@lattice/core/lib/utils"
-import { names as mongoNames } from "ltc-plugin-mongo"
-import { Context } from "c2v"
-import { Permissions } from "./modules/Permission"
-import { Users } from "./modules/User"
-import { PasswordResets } from "./modules/PasswordReset"
+import App, { contracts } from '@lattice/core'
+import { IConfiguration } from '@lattice/core/lib/contracts'
+import resolvers from './schema/resolvers'
+import Connection from 'ltc-plugin-mongo/lib/Connection'
+import { namer } from '@lattice/core/lib/utils'
+import { names as mongoNames } from 'ltc-plugin-mongo'
+import { Context } from 'c2v'
+import { Permissions } from './modules/Permission'
+import { Users } from './modules/User'
+import { PasswordResets } from './modules/PasswordReset'
 import { names as coreNames } from '@lattice/core'
 import { initPermissions } from './auth/init-permissions'
 
 export const names = {
-    AUTH_PERMISSIONS_REPOSITORY: Symbol(namer.resolve("auth", "permissions", "repository")),
-    AUTH_USERS_REPOSITORY: Symbol(namer.resolve("auth", "users", "repository")),
-    AUTH_PASSWORD_RESET_REPOSITORY: Symbol(namer.resolve("auth", "passwordResets", "repository")),
+  AUTH_PERMISSIONS_REPOSITORY: Symbol(namer.resolve('auth', 'permissions', 'repository')),
+  AUTH_USERS_REPOSITORY: Symbol(namer.resolve('auth', 'users', 'repository')),
+  AUTH_PASSWORD_RESET_REPOSITORY: Symbol(namer.resolve('auth', 'passwordResets', 'repository')),
 }
 
 export default class implements contracts.IPlugin {
 
-  name: string = "cyber-crafts.cms-plugin-auth"
+  name: string = 'cyber-crafts.cms-plugin-auth'
   private resolvers: object
 
   constructor () {

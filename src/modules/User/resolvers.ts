@@ -1,325 +1,323 @@
-import App from "@lattice/core"
-import { GraphQLResolveInfo } from "graphql"
-import { User, Users } from "./"
-import { merge } from "lodash"
-import { names } from "../../index"
+import App from '@lattice/core'
+import { GraphQLResolveInfo } from 'graphql'
+import { User, Users } from './'
+import { merge } from 'lodash'
+import { names } from '../../index'
 import './schema'
 import { schemaComposer, ResolveParams } from 'graphql-compose'
 import bcrypt = require('bcrypt')
-import { IStringKeyedObject } from "@lattice/core/lib/contracts"
+import { IStringKeyedObject } from '@lattice/core/lib/contracts'
 import jwt = require('jwt-simple')
-import { names as mailNames } from "ltc-plugin-mail"
+import { names as mailNames } from 'ltc-plugin-mail'
 
 const RandExp = require('randexp')
-import { UserTC } from "./schema"
+import { UserTC } from './schema'
 
 
 const transform = (item: User): object => {
-    const obj = item.serialize()
-    obj.id = item.getId()
-    delete obj[item.getIdFieldName()]
-    return obj
+  const obj = item.serialize()
+  obj.id = item.getId()
+  delete obj[ item.getIdFieldName() ]
+  return obj
 }
 
 const dataToModel = (data: any): any => {
-    if (data.password) {
-        return bcrypt.hash(data.password, 10)
-            .then(function (hash) {
-                // Store hash in your password DB.
-                data.password = hash
-                return data
-            })
-            .catch(err => {
-                console.log(err)
-            })
-    } else {
+  if (data.password) {
+    return bcrypt.hash(data.password, 10)
+      .then(function (hash) {
+        // Store hash in your password DB.
+        data.password = hash
         return data
-    }
+      })
+      .catch(err => {
+        console.log(err)
+      })
+  } else {
+    return data
+  }
 
 }
 const resetDataToModel = async (app: App, email: string): Promise<any> => {
-    let pr: IStringKeyedObject = {}
-    let userRepo = app.get<Users>(names.AUTH_USERS_REPOSITORY)
-    let user = (await userRepo.find({email: email}))[0]
-    pr.userId = user.getId()
-    pr.secretCode = new RandExp(/^.{64}$/).gen()
-    pr.createdAt = new Date(Date.now())
-    pr.state = 'pending'
-    return pr
+  let pr: IStringKeyedObject = {}
+  let userRepo = app.get<Users>(names.AUTH_USERS_REPOSITORY)
+  let user = (await userRepo.find({ email: email }))[ 0 ]
+  pr.userId = user.getId()
+  pr.secretCode = new RandExp(/^.{64}$/).gen()
+  pr.createdAt = new Date(Date.now())
+  pr.state = 'pending'
+  return pr
 }
 export default (container: App): void => {
 
-    const repository = container
-        .get<Users>(names.AUTH_USERS_REPOSITORY)
+  const repository = container
+    .get<Users>(names.AUTH_USERS_REPOSITORY)
 
-    const resetRepo = container
-        .get<Users>(names.AUTH_PASSWORD_RESET_REPOSITORY)
+  const resetRepo = container
+    .get<Users>(names.AUTH_PASSWORD_RESET_REPOSITORY)
 
 
-    // Queries ===================================
-    UserTC.addResolver({
-        name: 'getUser',
-        type: 'User!',
-        args: {id: 'ID!'},
-        resolve: async ({obj, args, context, info}: ResolveParams<App, any>): Promise<any> => {
-            const items = await repository.findByIds([args.id])
-            return (items.length !== 1) ? undefined : transform(items[0])
-        },
-    })
-    UserTC.addResolver({
-        name: 'getUsers',
-        type: '[User!]!',
-        args: {skip: 'Int', limit: 'Int', filter: 'JSON'},
-        resolve: async ({obj, args, context, info}: ResolveParams<App, any>): Promise<any> => {
-            const users = await repository.find(args.filter, args.limit, args.skip)
-            return users.map(transform)
-        },
-    })
-    UserTC.addResolver({
-        name: 'countUsers',
-        type: 'Int!',
-        args: {filter: 'JSON'},
-        resolve: async ({obj, args, context, info}: ResolveParams<App, any>): Promise<any> => {
-            return await repository.count(args.filter)
-        }
-    })
-    UserTC.addResolver({
-        name: 'login',
-        type: 'AuthedUser!',
-        args: {email: 'String!', password: 'String!'},
-        resolve: async ({obj, args, context, info}: ResolveParams<App, any>): Promise<any> => {
-            let user: any = (await repository.find({email: args.email}))[0]
-            if(user) {
-              let serializedUser: IStringKeyedObject = transform(user)
-              return bcrypt.compare(args.password, serializedUser.password)
-                .then((res: Boolean) => {
-                  if (res) {
-                    let token = jwt.encode({userId: user.getId()}, container.config().get('auth').secret)
-                    let authedUser: any = {
-                      id: user.getId(),
-                      token: token,
-                      permissions: user.data.permissions,
-                      email: user.data.email
-                    }
-                    if (user.data.name) {
-                      authedUser.name = user.data.name
-                    }
-                    return authedUser
-                  } else {
-                    throw new Error('Invalid credentials.')
-                  }
-                })
+  // Queries ===================================
+  UserTC.addResolver({
+    name: 'getUser',
+    type: 'User!',
+    args: { id: 'ID!' },
+    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+      const items = await repository.findByIds([ args.id ])
+      return (items.length !== 1) ? undefined : transform(items[ 0 ])
+    },
+  })
+  UserTC.addResolver({
+    name: 'getUsers',
+    type: '[User!]!',
+    args: { skip: 'Int', limit: 'Int', filter: 'JSON' },
+    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+      const users = await repository.find(args.filter, args.limit, args.skip)
+      return users.map(transform)
+    },
+  })
+  UserTC.addResolver({
+    name: 'countUsers',
+    type: 'Int!',
+    args: { filter: 'JSON' },
+    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+      return await repository.count(args.filter)
+    },
+  })
+  UserTC.addResolver({
+    name: 'login',
+    type: 'AuthedUser!',
+    args: { email: 'String!', password: 'String!' },
+    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+      let user: any = (await repository.find({ email: args.email }))[ 0 ]
+      let serializedUser: IStringKeyedObject = transform(user)
+      return bcrypt.compare(args.password, serializedUser.password)
+        .then((res: Boolean) => {
+          if (res) {
+            let token = jwt.encode({ userId: user.getId() }, container.config().get('auth').secret)
+            let authedUser: any = {
+              id: user.getId(),
+              token: token,
+              permissions: user.data.permissions,
+              email: user.data.email,
             }
-        }
-    })
+            if (user.data.name) {
+              authedUser.name = user.data.name
+            }
+            return authedUser
+          } else {
+            throw new Error('Invalid credentials.')
+          }
+        })
+    },
+  })
 
-    schemaComposer.rootQuery().addFields({getUser: UserTC.getResolver('getUser')})
-    schemaComposer.rootQuery().addFields({getUsers: UserTC.getResolver('getUsers')})
-    schemaComposer.rootQuery().addFields({countUsers: UserTC.getResolver('countUsers')})
-    schemaComposer.rootQuery().addFields({login: UserTC.getResolver('login')})
-    // Mutations ===================================
-    UserTC.addResolver({
-        name: 'addUser',
-        type: 'User',
-        args: {input: 'NewUser!'},
-        resolve: async ({obj, args, context, info}: ResolveParams<App, any>): Promise<any> => {
-            const data = await dataToModel(args.input)
-            data.permissions = []
-            data.status = 'active'
-            let newUser = repository.parse(data)
-            let validation
-            try {
-                validation = await
-                    newUser.selfValidate()
-            } catch (e) {
-                console.log(e)
-            }
-            if (validation.success) {
-                newUser = (await repository.insert([newUser]))[0]
-                return transform(newUser)
-            } else {
-                throw new Error(JSON.stringify(validation.errors[0]))
-            }
+  schemaComposer.rootQuery().addFields({ getUser: UserTC.getResolver('getUser') })
+  schemaComposer.rootQuery().addFields({ getUsers: UserTC.getResolver('getUsers') })
+  schemaComposer.rootQuery().addFields({ countUsers: UserTC.getResolver('countUsers') })
+  schemaComposer.rootQuery().addFields({ login: UserTC.getResolver('login') })
+  // Mutations ===================================
+  UserTC.addResolver({
+    name: 'addUser',
+    type: 'User',
+    args: { input: 'NewUser!' },
+    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+      const data = await dataToModel(args.input)
+      data.permissions = []
+      data.status = 'active'
+      let newUser = repository.parse(data)
+      let validation
+      try {
+        validation = await
+          newUser.selfValidate()
+      } catch (e) {
+        console.log(e)
+      }
+      if (validation.success) {
+        newUser = (await repository.insert([ newUser ]))[ 0 ]
+        return transform(newUser)
+      } else {
+        throw new Error(JSON.stringify(validation.errors[ 0 ]))
+      }
+    },
+  })
+  UserTC.addResolver({
+    name: 'deleteUser',
+    type: 'Boolean!',
+    args: { id: 'ID!' },
+    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+      const item = (await repository.findByIds([ args.id ]))
+      if (item && await repository.remove(item)) {
+        return true
+      } else {
+        throw new Error('no User with this id was found')
+      }
+    },
+  })
+  UserTC.addResolver({
+    name: 'updateUser',
+    type: 'User!',
+    args: { id: 'ID!', input: 'UserPatch!' },
+    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+      const items = (await repository.findByIds([ args.id ]))
+      if (items.length > 0) {
+        const item = items[ 0 ]
+        const data = merge(transform(items[ 0 ]), args.input)
+        item.set(await dataToModel(data))
+        if (await repository.update([ item ])) {
+          return transform(item)
         }
-    })
-    UserTC.addResolver({
-        name: 'deleteUser',
-        type: 'Boolean!',
-        args: {id: 'ID!'},
-        resolve: async ({obj, args, context, info}: ResolveParams<App, any>): Promise<any> => {
-            const item = (await repository.findByIds([args.id]))
-            if (item && await repository.remove(item)) {
-                return true
-            } else {
-                throw new Error("no User with this id was found")
-            }
+      } else {
+        throw new Error('no User with this id was found')
+      }
+    },
+  })
+  UserTC.addResolver({
+    name: 'changePassword',
+    type: 'Boolean!',
+    args: { id: 'ID!', newPassword: 'String!' },
+    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+      const items = (await repository.findByIds([ args.id ]))
+      if (items.length > 0) {
+        const item = items[ 0 ]
+        const data = merge(transform(items[ 0 ]), { password: args.newPassword })
+        item.set(await dataToModel(data))
+        if (await repository.update([ item ])) {
+          return true
         }
-    })
-    UserTC.addResolver({
-        name: 'updateUser',
-        type: 'User!',
-        args: {id: 'ID!', input: 'UserPatch!'},
-        resolve: async ({obj, args, context, info}: ResolveParams<App, any>): Promise<any> => {
-            const items = (await repository.findByIds([args.id]))
-            if (items.length > 0) {
-                const item = items[0]
-                const data = merge(transform(items[0]), args.input)
-                item.set(await dataToModel(data))
-                if (await repository.update([item])) {
-                    return transform(item)
-                }
-            } else {
-                throw new Error("no User with this id was found")
-            }
+      } else {
+        throw new Error('no User with this id was found')
+      }
+    },
+  })
+  UserTC.addResolver({
+    name: 'changeEmail',
+    type: 'Boolean!',
+    args: { id: 'ID!', newEmail: 'String!' },
+    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+      const items = (await repository.findByIds([ args.id ]))
+      if (items.length > 0) {
+        const item = items[ 0 ]
+        const data = merge(transform(items[ 0 ]), { email: args.newEmail })
+        item.set(await dataToModel(data))
+        if (await repository.update([ item ])) {
+          return true
         }
-    })
-    UserTC.addResolver({
-        name: 'changePassword',
-        type: 'Boolean!',
-        args: {id: 'ID!', newPassword: 'String!'},
-        resolve: async ({obj, args, context, info}: ResolveParams<App, any>): Promise<any> => {
-            const items = (await repository.findByIds([args.id]))
-            if (items.length > 0) {
-                const item = items[0]
-                const data = merge(transform(items[0]), {password: args.newPassword})
-                item.set(await dataToModel(data))
-                if (await repository.update([item])) {
-                    return true
-                }
-            } else {
-                throw new Error("no User with this id was found")
-            }
+      } else {
+        throw new Error('no User with this id was found')
+      }
+    },
+  })
+  UserTC.addResolver({
+    name: 'resetPassword',
+    type: 'Boolean!',
+    args: { email: 'String!' },
+    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+      const data = await resetDataToModel(container, args.email)
+      let newPasswordReset: any = resetRepo.parse(data)
+      let validation
+      try {
+        validation = await
+          newPasswordReset.selfValidate()
+      } catch (e) {
+        console.log(e)
+      }
+      if (validation.success) {
+        newPasswordReset = (await resetRepo.insert([ newPasswordReset ]))[ 0 ]
+        let transporter: any = container.get(mailNames.MAIL_TRANSPORTER_SERVICE)
+        let mailOptions = {
+          from: 'admin', // sender address
+          to: args.email, // list of receivers
+          subject: 'Hassan Kutbi - Password reset request', // Subject line
+          // html: '<b>Hello world?</b>' // html body
+          text: newPasswordReset.secretCode, // html body
         }
-    })
-    UserTC.addResolver({
-        name: 'changeEmail',
-        type: 'Boolean!',
-        args: {id: 'ID!', newEmail: 'String!'},
-        resolve: async ({obj, args, context, info}: ResolveParams<App, any>): Promise<any> => {
-            const items = (await repository.findByIds([args.id]))
-            if (items.length > 0) {
-                const item = items[0]
-                const data = merge(transform(items[0]), {email: args.newEmail})
-                item.set(await dataToModel(data))
-                if (await repository.update([item])) {
-                    return true
-                }
-            } else {
-                throw new Error("no User with this id was found")
+        return transporter.sendMail(mailOptions)
+          .then((info: any) => {
+            if (info.accepted.length > 0) {
+              return true
             }
-        }
-    })
-    UserTC.addResolver({
-        name: 'resetPassword',
-        type: 'Boolean!',
-        args: {email: 'String!'},
-        resolve: async ({obj, args, context, info}: ResolveParams<App, any>): Promise<any> => {
-            const data = await resetDataToModel(container, args.email)
-            let newPasswordReset: any = resetRepo.parse(data)
-            let validation
-            try {
-                validation = await
-                    newPasswordReset.selfValidate()
-            } catch (e) {
-                console.log(e)
-            }
-            if (validation.success) {
-                newPasswordReset = (await resetRepo.insert([newPasswordReset]))[0]
-                let transporter: any = container.get(mailNames.MAIL_TRANSPORTER_SERVICE)
-                let mailOptions = {
-                    from: 'admin', // sender address
-                    to: args.email, // list of receivers
-                    subject: 'Hassan Kutbi - Password reset request', // Subject line
-                    // html: '<b>Hello world?</b>' // html body
-                    text: newPasswordReset.secretCode // html body
-                }
-                return transporter.sendMail(mailOptions)
-                    .then((info: any) => {
-                        if (info.accepted.length > 0) {
-                            return true
-                        }
-                    })
-                    .catch((err: any) => {
-                        console.log(err)
-                        throw new Error('Error sending verification email.')
-                    })
-                // return transform(newPasswordReset)
-            } else {
-                throw new Error(JSON.stringify(validation.errors[0]))
-            }
-        }
-    })
-    UserTC.addResolver({
-        name: 'verifyResetPassword',
-        type: 'Boolean!',
-        args: {id: 'ID!', code: 'String!', password: 'String!'},
-        resolve: async ({obj, args, context, info}: ResolveParams<App, any>): Promise<any> => {
-            let instance: any = (await resetRepo.findByIds([args.id]))[0]
-            let userRepo = container.get<Users>(names.AUTH_USERS_REPOSITORY)
+          })
+          .catch((err: any) => {
+            console.log(err)
+            throw new Error('Error sending verification email.')
+          })
+        // return transform(newPasswordReset)
+      } else {
+        throw new Error(JSON.stringify(validation.errors[ 0 ]))
+      }
+    },
+  })
+  UserTC.addResolver({
+    name: 'verifyResetPassword',
+    type: 'Boolean!',
+    args: { id: 'ID!', code: 'String!', password: 'String!' },
+    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+      let instance: any = (await resetRepo.findByIds([ args.id ]))[ 0 ]
+      let userRepo = container.get<Users>(names.AUTH_USERS_REPOSITORY)
 
-            if (instance.data.secretCode === args.code) {
-                let rpInstanceData: any = merge(transform(instance), {state: 'processed'})
-                instance.set(rpInstanceData)
-                let updatedRp = resetRepo.update([instance])
+      if (instance.data.secretCode === args.code) {
+        let rpInstanceData: any = merge(transform(instance), { state: 'processed' })
+        instance.set(rpInstanceData)
+        let updatedRp = resetRepo.update([ instance ])
 
-                let user: any = (await userRepo.findByIds([rpInstanceData.userId]))[0]
-                let newPassword = await bcrypt.hash(args.password, 10)
-                let userData: any = merge(transform(user), {password: newPassword})
-                user.set(userData)
-                let updatedUser = userRepo.update([user])
-                return Promise.all([updatedRp, updatedUser])
-                    .then(res => {
-                        return true
-                    })
-                    .catch(err => {
-                        return false
-                    })
-            } else {
-                return false
-            }
+        let user: any = (await userRepo.findByIds([ rpInstanceData.userId ]))[ 0 ]
+        let newPassword = await bcrypt.hash(args.password, 10)
+        let userData: any = merge(transform(user), { password: newPassword })
+        user.set(userData)
+        let updatedUser = userRepo.update([ user ])
+        return Promise.all([ updatedRp, updatedUser ])
+          .then(res => {
+            return true
+          })
+          .catch(err => {
+            return false
+          })
+      } else {
+        return false
+      }
+    },
+  })
+  UserTC.addResolver({
+    name: 'register',
+    type: 'AuthedUser!',
+    args: { input: 'NewUser!' },
+    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+      const data = await dataToModel(args.input)
+      data.permissions = []
+      data.status = 'active'
+      let newUser: any = repository.parse(data)
+      let validation
+      try {
+        validation = await
+          newUser.selfValidate()
+      } catch (e) {
+        console.log(e)
+      }
+      if (validation.success) {
+        newUser = (await repository.insert([ newUser ]))[ 0 ]
+        let token = jwt.encode({ userId: newUser.getId() }, container.config().get('auth').secret)
+        let authedUser: any = {
+          id: newUser.getId(),
+          token: token,
+          permissions: newUser.data.permissions,
+          email: newUser.data.email,
         }
-    })
-    UserTC.addResolver({
-        name: 'register',
-        type: 'AuthedUser',
-        args: {input: 'NewUser!'},
-        resolve: async ({obj, args, context, info}: ResolveParams<App, any>): Promise<any> => {
-            const data = await dataToModel(args.input)
-            data.permissions = []
-            data.status = 'active'
-            let newUser: any = repository.parse(data)
-            let validation
-            try {
-                validation = await
-                    newUser.selfValidate()
-            } catch (e) {
-                console.log(e)
-            }
-            if (validation.success) {
-                newUser = (await repository.insert([newUser]))[0]
-                let token = jwt.encode({userId: newUser.getId()}, container.config().get('auth').secret)
-                let authedUser: any = {
-                    id: newUser.getId(),
-                    token: token,
-                    permissions: newUser.data.permissions,
-                    email: newUser.data.email
-                }
-                if (newUser.data.name) {
-                    authedUser.name = newUser.data.name
-                }
-                return authedUser
-            } else {
-                throw new Error(JSON.stringify(validation.errors[0]))
-            }
+        if (newUser.data.name) {
+          authedUser.name = newUser.data.name
         }
-    })
+        return authedUser
+      } else {
+        throw new Error(JSON.stringify(validation.errors[ 0 ]))
+      }
+    },
+  })
 
-    schemaComposer.rootMutation().addFields({ addUser: UserTC.getResolver('addUser')})
-    schemaComposer.rootMutation().addFields({ deleteUser: UserTC.getResolver('deleteUser')})
-    schemaComposer.rootMutation().addFields({ updateUser: UserTC.getResolver('updateUser')})
-    schemaComposer.rootMutation().addFields({ changePassword: UserTC.getResolver('changePassword')})
-    schemaComposer.rootMutation().addFields({ changeEmail: UserTC.getResolver('changeEmail')})
-    schemaComposer.rootMutation().addFields({ resetPassword: UserTC.getResolver('resetPassword')})
-    schemaComposer.rootMutation().addFields({ verifyResetPassword: UserTC.getResolver('verifyResetPassword')})
-    schemaComposer.rootMutation().addFields({ register: UserTC.getResolver('register')})
+  schemaComposer.rootMutation().addFields({ addUser: UserTC.getResolver('addUser') })
+  schemaComposer.rootMutation().addFields({ deleteUser: UserTC.getResolver('deleteUser') })
+  schemaComposer.rootMutation().addFields({ updateUser: UserTC.getResolver('updateUser') })
+  schemaComposer.rootMutation().addFields({ changePassword: UserTC.getResolver('changePassword') })
+  schemaComposer.rootMutation().addFields({ changeEmail: UserTC.getResolver('changeEmail') })
+  schemaComposer.rootMutation().addFields({ resetPassword: UserTC.getResolver('resetPassword') })
+  schemaComposer.rootMutation().addFields({ verifyResetPassword: UserTC.getResolver('verifyResetPassword') })
+  schemaComposer.rootMutation().addFields({ register: UserTC.getResolver('register') })
 }

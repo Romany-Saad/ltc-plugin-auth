@@ -23,7 +23,7 @@ export const initPermissions = async (app: App) => {
         endpoint: endpoint,
         name: endpoint,
         protected: true,
-        type: 'query'
+        type: 'query',
       }))
     }
   }
@@ -33,7 +33,7 @@ export const initPermissions = async (app: App) => {
         endpoint: endpoint,
         name: endpoint,
         protected: true,
-        type: 'mutation'
+        type: 'mutation',
       }))
     }
   }
@@ -44,7 +44,7 @@ export const initPermissions = async (app: App) => {
         endpoint: endpoint,
         name: endpoint,
         protected: true,
-        type: 'subscription'
+        type: 'subscription',
       }))
     }
   }*/

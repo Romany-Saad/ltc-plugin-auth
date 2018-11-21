@@ -1,6 +1,6 @@
-export {default as User} from "./model"
-export {default as Users} from "./repository"
-export {default as resolvers} from "./resolvers"
+export { default as User } from './model'
+export { default as Users } from './repository'
+export { default as resolvers } from './resolvers'
 
 /*
 // adding the repository to the container ./src/index.ts

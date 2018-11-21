@@ -1,4 +1,4 @@
-import App, { contracts } from "@lattice/core";
+import App, { contracts } from '@lattice/core';
 export declare const names: {
     AUTH_PERMISSIONS_REPOSITORY: symbol;
     AUTH_USERS_REPOSITORY: symbol;
