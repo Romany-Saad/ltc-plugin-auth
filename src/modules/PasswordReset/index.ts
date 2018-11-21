@@ -1,6 +1,6 @@
-export {default as PasswordReset} from "./model"
-export {default as PasswordResets} from "./repository"
-export {default as resolvers} from "./resolvers"
+export { default as PasswordReset } from './model'
+export { default as PasswordResets } from './repository'
+export { default as resolvers } from './resolvers'
 
 /*
 // adding the repository to the container ./src/index.ts
