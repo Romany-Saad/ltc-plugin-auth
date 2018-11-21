@@ -65,7 +65,7 @@ export const initPermissions = async (app: App) => {
         // if exists and permissions > 0 then update
         if (user) {
           if (permissions.length > 0) {
-            let allPermissions = user.datat.permissions.concat(permissionsIds)
+            let allPermissions = user.data.permissions.concat(permissionsIds)
             allPermissions = [ ...new Set(allPermissions) ]
             user.set({ permissions: allPermissions })
             userRepo.update([ user ])
