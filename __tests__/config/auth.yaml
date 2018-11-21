@@ -1,1 +1,5 @@
 secret: LTC_CMS_SECRET
+admin:
+  name: admin
+  password: 123456sd
+  email: habib@cyber-crafts.com
