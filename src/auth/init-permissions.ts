@@ -18,7 +18,7 @@ export const initPermissions = async (app: App) => {
   let queryEndpoints = schemaComposer.rootQuery().getFields()
   let mutationEndpoints = schemaComposer.rootMutation().getFields()
   // TODO: find a workaround to add subscriptions
-  let subscriptionEndpoints = schemaComposer.Subscription.getFields()
+  // let subscriptionEndpoints = schemaComposer.rootSubscription().getFields()
   // get all the endpoints that doesn't exist in db
   let newEndpoints = []
   for (let endpoint in queryEndpoints) {
@@ -59,7 +59,6 @@ export const initPermissions = async (app: App) => {
           return permission.getId()
         })
         let userConfig = app.config().get('auth').admin
-        console.log(userConfig)
         // check if admin user already exists
         let user = (await userRepo.find({ email: userConfig.email }))[ 0 ]
         // if exists and permissions > 0 then update
