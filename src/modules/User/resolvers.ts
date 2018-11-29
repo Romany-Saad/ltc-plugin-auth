@@ -1,17 +1,17 @@
 import App from '@lattice/core'
-import { GraphQLResolveInfo } from 'graphql'
 import { User, Users } from './'
 import { merge } from 'lodash'
 import { names } from '../../index'
 import './schema'
-import { schemaComposer, ResolveParams } from 'graphql-compose'
-import bcrypt = require('bcrypt')
+import { ResolveParams, schemaComposer } from 'graphql-compose'
 import { IStringKeyedObject } from '@lattice/core/lib/contracts'
-import jwt = require('jwt-simple')
 import { names as mailNames } from 'ltc-plugin-mail'
+import { Permissions } from '../Permission'
+import { UserTC } from './schema'
+import bcrypt = require('bcrypt')
+import jwt = require('jwt-simple')
 
 const RandExp = require('randexp')
-import { UserTC } from './schema'
 
 
 const transform = (item: User): object => {
@@ -52,6 +52,9 @@ export default (container: App): void => {
   const repository = container
     .get<Users>(names.AUTH_USERS_REPOSITORY)
 
+  const permissionRepo = container
+    .get<Permissions>(names.AUTH_PERMISSIONS_REPOSITORY)
+
   const resetRepo = container
     .get<Users>(names.AUTH_PASSWORD_RESET_REPOSITORY)
 
@@ -89,6 +92,13 @@ export default (container: App): void => {
     args: { email: 'String!', password: 'String!' },
     resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
       let user: any = (await repository.find({ email: args.email }))[ 0 ]
+      if (!user) {
+        throw new Error('can not find user')
+      }
+      let permissionsNames: any = await permissionRepo.findByIds(user.data.permissions)
+      permissionsNames = permissionsNames.map((permission: any) => {
+        return permission.data.name
+      })
       let serializedUser: IStringKeyedObject = transform(user)
       return bcrypt.compare(args.password, serializedUser.password)
         .then((res: Boolean) => {
@@ -97,7 +107,7 @@ export default (container: App): void => {
             let authedUser: any = {
               id: user.getId(),
               token: token,
-              permissions: user.data.permissions,
+              permissions: permissionsNames,
               email: user.data.email,
             }
             if (user.data.name) {
@@ -125,13 +135,7 @@ export default (container: App): void => {
       data.permissions = []
       data.status = 'active'
       let newUser = repository.parse(data)
-      let validation
-      try {
-        validation = await
-          newUser.selfValidate()
-      } catch (e) {
-        console.log(e)
-      }
+      let validation = await newUser.selfValidate()
       if (validation.success) {
         newUser = (await repository.insert([ newUser ]))[ 0 ]
         return transform(newUser)
@@ -214,13 +218,7 @@ export default (container: App): void => {
     resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
       const data = await resetDataToModel(container, args.email)
       let newPasswordReset: any = resetRepo.parse(data)
-      let validation
-      try {
-        validation = await
-          newPasswordReset.selfValidate()
-      } catch (e) {
-        console.log(e)
-      }
+      let validation = await newPasswordReset.selfValidate()
       if (validation.success) {
         newPasswordReset = (await resetRepo.insert([ newPasswordReset ]))[ 0 ]
         let transporter: any = container.get(mailNames.MAIL_TRANSPORTER_SERVICE)
@@ -286,13 +284,7 @@ export default (container: App): void => {
       data.permissions = []
       data.status = 'active'
       let newUser: any = repository.parse(data)
-      let validation
-      try {
-        validation = await
-          newUser.selfValidate()
-      } catch (e) {
-        console.log(e)
-      }
+      let validation = await newUser.selfValidate()
       if (validation.success) {
         newUser = (await repository.insert([ newUser ]))[ 0 ]
         let token = jwt.encode({ userId: newUser.getId() }, container.config().get('auth').secret)

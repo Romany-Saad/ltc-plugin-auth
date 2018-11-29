@@ -42,6 +42,7 @@ describe("given schema is the GraphQlSchema object loaded with schemas from User
         token = x.data.login.token
         expect(x).toHaveProperty("data.login.email");
         expect(x).toHaveProperty("data.login.id");
+        expect(typeof x.data.login.permissions[0]).toBe("string");
     });
 
     it("should retrieve authed user data from authentication class", async () => {

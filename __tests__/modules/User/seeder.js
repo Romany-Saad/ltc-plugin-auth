@@ -10,7 +10,7 @@ const userSeeder = async (app, numOfSeeds, password, email = '') => {
     for (let i = 0; i < numOfSeeds; i++) {
         let fake = await userFaker(password, email);
         fake.status = faker.random.arrayElement(['pending', 'active', 'banned']);
-        fake.permissions = [permission.data.name];
+        fake.permissions = [permission.getId()];
         fake = userRepo.parse(fake);
         fakes.push(fake)
     }
