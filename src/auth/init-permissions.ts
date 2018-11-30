@@ -76,7 +76,7 @@ export const initPermissions = async (app: App) => {
           // if user doesn't exist create it and give it all the permissions
           let userData = {
             email: userConfig.email,
-            password: bcrypt.hash(userConfig.password, 10),
+            password: await bcrypt.hash(userConfig.password, 10),
             status: 'active',
             permissions: permissionsIds,
             name: userConfig.name,
