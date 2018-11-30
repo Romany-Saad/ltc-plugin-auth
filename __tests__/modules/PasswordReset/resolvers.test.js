@@ -53,7 +53,6 @@ describe('given schema is the GraphQlSchema object loaded with schemas from Pass
     // console.log(reset)
     // console.log(id, code, password)
     const x = await graphql(schema, q, null, null, {id, code, password})
-    console.log(JSON.stringify(x))
     expect(x.data.verifyResetPassword).toBe(true)
   })
   /*

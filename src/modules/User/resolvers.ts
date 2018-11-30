@@ -120,11 +120,21 @@ export default (container: App): void => {
         })
     },
   })
+  UserTC.addResolver({
+    name: 'checkToken',
+    type: 'Boolean!',
+    args: { token: 'String!' },
+    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+      let token = jwt.decode(args.token, container.config().get('auth').secret)
+      return !!token
+    },
+  })
 
   schemaComposer.rootQuery().addFields({ getUser: UserTC.getResolver('getUser') })
   schemaComposer.rootQuery().addFields({ getUsers: UserTC.getResolver('getUsers') })
   schemaComposer.rootQuery().addFields({ countUsers: UserTC.getResolver('countUsers') })
   schemaComposer.rootQuery().addFields({ login: UserTC.getResolver('login') })
+  schemaComposer.rootQuery().addFields({ checkToken: UserTC.getResolver('checkToken') })
   // Mutations ===================================
   UserTC.addResolver({
     name: 'addUser',

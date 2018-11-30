@@ -45,6 +45,12 @@ describe('given schema is the GraphQlSchema object loaded with schemas from User
     expect(typeof x.data.login.permissions[0]).toBe('string')
   })
 
+  it('should verify token', async () => {
+    const q = `query checkToken($token: String!) { checkToken (token: $token)}`
+    const x = await graphql(schema, q, null, null, {token})
+    expect(x.data.checkToken).toBe(true)
+  })
+
   it('should retrieve authed user data from authentication class', async () => {
     let authed = new Auth(app, `Bearer ${token}`)
     expect(authed.getAuthedUser()).toHaveProperty('userId')
