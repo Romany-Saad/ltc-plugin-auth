@@ -10,7 +10,7 @@ export const initPermissions = async (app: App) => {
   const permissionsRepo = app.get<AMongoDbRepository<any>>(names.AUTH_PERMISSIONS_REPOSITORY)
   const userRepo = app.get<AMongoDbRepository<any>>(names.AUTH_USERS_REPOSITORY)
   // get existing endpoints in database
-  const databasesPermissions = await permissionsRepo.find({})
+  const databasesPermissions = await permissionsRepo.find({}, 1000)
   let databaseEndpoints = databasesPermissions.map(permission => {
     return permission.data.endpoint
   })

@@ -95,7 +95,7 @@ export default (container: App): void => {
       if (!user) {
         throw new Error('can not find user')
       }
-      let permissionsNames: any = await permissionRepo.findByIds(user.data.permissions)
+      let permissionsNames: any = await permissionRepo.findByIds(user.data.permissions, 1000)
       permissionsNames = permissionsNames.map((permission: any) => {
         return permission.data.name
       })
