@@ -1,4 +1,4 @@
-import { TypeComposer, InputTypeComposer } from 'graphql-compose'
+import { InputTypeComposer, TypeComposer } from 'graphql-compose'
 
 export const UserTC = TypeComposer.create(`
 type User {

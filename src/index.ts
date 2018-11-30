@@ -1,4 +1,4 @@
-import App, { contracts } from '@lattice/core'
+import App, { contracts, names as coreNames } from '@lattice/core'
 import { IConfiguration } from '@lattice/core/lib/contracts'
 import resolvers from './schema/resolvers'
 import Connection from 'ltc-plugin-mongo/lib/Connection'
@@ -8,7 +8,6 @@ import { Context } from 'c2v'
 import { Permissions } from './modules/Permission'
 import { Users } from './modules/User'
 import { PasswordResets } from './modules/PasswordReset'
-import { names as coreNames } from '@lattice/core'
 import { initPermissions } from './auth/init-permissions'
 
 export const names = {

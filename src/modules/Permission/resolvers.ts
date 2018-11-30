@@ -1,11 +1,9 @@
 import App from '@lattice/core/lib/App'
-import { GraphQLResolveInfo } from 'graphql'
-import { IModel } from '@lattice/core/lib/contracts'
 import { Permission, Permissions } from './'
 import { merge } from 'lodash'
 import { names } from '../../index'
 import './schema'
-import { schemaComposer, ResolveParams } from 'graphql-compose'
+import { ResolveParams, schemaComposer } from 'graphql-compose'
 import { PermissionTC } from './schema'
 
 const transform = (item: Permission): object => {

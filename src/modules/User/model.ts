@@ -1,5 +1,4 @@
 import BaseModel from '@lattice/core/lib/abstractions/BaseModel'
-import { rootPath } from '../../globals'
 import c2v from 'c2v'
 import { ITypeValidator } from 'c2v/lib/contracts'
 import { arrayExists, mongoUnique } from 'ltc-plugin-mongo/lib/validators'

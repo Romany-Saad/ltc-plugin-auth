@@ -2,8 +2,8 @@ import App from '@lattice/core'
 import { schemaComposer } from 'graphql-compose'
 import AMongoDbRepository from 'ltc-plugin-mongo/lib/abstractions/AMongoDbRepository'
 import { names } from '../index'
-import bcrypt = require('bcrypt')
 import { names as mailNames } from 'ltc-plugin-mail'
+import bcrypt = require('bcrypt')
 
 export const initPermissions = async (app: App) => {
   // repository declarations
