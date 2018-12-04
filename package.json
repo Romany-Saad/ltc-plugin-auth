@@ -24,7 +24,6 @@
     "@types/jwt-simple": "^0.5.33",
     "bcrypt": "^3.0.0",
     "jwt-simple": "^0.5.1",
-    "ltc-plugin-common": "git+ssh://git@bitbucket.org/cyber-crafts/ltc-plugin-common.git",
     "ltc-plugin-config": "git+ssh://git@bitbucket.org/cyber-crafts/ltc-plugin-config.git",
     "ltc-plugin-mail": "git+ssh://git@bitbucket.org/cyber-crafts/ltc-plugin-mail.git",
     "ltc-plugin-mongo": "git+ssh://git@bitbucket.org/cyber-crafts/ltc-plugin-mongo.git",
