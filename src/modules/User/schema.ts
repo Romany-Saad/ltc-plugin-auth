@@ -31,6 +31,7 @@ InputTypeComposer.create(`
 input UserPatch {
     name: String
     permissions: [ID]
+    status: String
 }`)
 
 InputTypeComposer.create(`
