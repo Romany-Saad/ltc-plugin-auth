@@ -142,7 +142,8 @@ export default (container: App): void => {
     args: { input: 'NewUser!' },
     resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
       const data = await dataToModel(args.input)
-      data.permissions = []
+      data.permissions = container.config().get('auth').user.defaultPermissions || []
+      console.log(data.permissions)
       data.status = 'active'
       let newUser = repository.parse(data)
       let validation = await newUser.selfValidate()
