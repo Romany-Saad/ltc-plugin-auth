@@ -16,7 +16,7 @@ beforeAll(async () => {
   repository = app.get(names.AUTH_USERS_REPOSITORY)
   instance = (await seeder(app, 1, '123456sd'))[0]
   permission = (await permissionSeeder(app, 1))[0]
-})
+}, 30000)
 
 describe('given schema is the GraphQlSchema object loaded with schemas from User plugin', () => {
 
@@ -45,6 +45,11 @@ describe('given schema is the GraphQlSchema object loaded with schemas from User
     expect(typeof x.data.login.permissions[0]).toBe('string')
   })
 
+  it('should return User data on Mutation.changePassword()', async () => {
+    const q = `mutation { changePassword ( id: "${instance.getId()}", oldPassword: "123456sd", newPassword: "654987ds")}`
+    const x = await graphql(schema, q)
+    expect(x.data.changePassword).toBe(true)
+  })
   it('should verify token', async () => {
     const q = `query checkToken($token: String!) { checkToken (token: $token)}`
     const x = await graphql(schema, q, null, null, {token})
@@ -67,12 +72,6 @@ describe('given schema is the GraphQlSchema object loaded with schemas from User
     const q = `mutation { changeEmail ( id: "${instance.getId()}", newEmail: "something@example.com")}`
     const x = await graphql(schema, q)
     expect(x.data.changeEmail).toBe(true)
-  })
-
-  it('should return User data on Mutation.changePassword()', async () => {
-    const q = `mutation { changePassword ( id: "${instance.getId()}", newPassword: "654987ds")}`
-    const x = await graphql(schema, q)
-    expect(x.data.changePassword).toBe(true)
   })
 
   it('should return a list of Users on Query.getUsers()', async () => {

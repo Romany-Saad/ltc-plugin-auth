@@ -96,9 +96,11 @@ export default (container: App): void => {
         throw new Error('can not find user')
       }
       let permissionsNames: any = await permissionRepo.findByIds(user.data.permissions, 1000)
-      permissionsNames = permissionsNames.map((permission: any) => {
-        return permission.data.name
-      })
+      if (permissionsNames.length > 0) {
+        permissionsNames = permissionsNames.map((permission: any) => {
+          return permission.data.name
+        })
+      }
       let serializedUser: IStringKeyedObject = transform(user)
       return bcrypt.compare(args.password, serializedUser.password)
         .then((res: Boolean) => {
@@ -142,8 +144,13 @@ export default (container: App): void => {
     args: { input: 'NewUser!' },
     resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
       const data = await dataToModel(args.input)
-      data.permissions = container.config().get('auth').user.defaultPermissions || []
-      console.log(data.permissions)
+      let permissions = container.config().get('auth').user.defaultPermissions || []
+      if (permissions.length > 0) {
+        permissions = permissionRepo.find({ name: permissions })
+        data.permissions = permissions.length > 0 ? permissions.map((p: any) => p.getId()) : []
+      } else {
+        data.permissions = []
+      }
       data.status = 'active'
       let newUser = repository.parse(data)
       let validation = await newUser.selfValidate()
@@ -189,11 +196,15 @@ export default (container: App): void => {
   UserTC.addResolver({
     name: 'changePassword',
     type: 'Boolean!',
-    args: { id: 'ID!', newPassword: 'String!' },
+    args: { id: 'ID!', oldPassword: 'String!', newPassword: 'String!' },
     resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
       const items = (await repository.findByIds([ args.id ]))
       if (items.length > 0) {
-        const item = items[ 0 ]
+        const item: any = items[ 0 ]
+        let match = await bcrypt.compare(args.oldPassword, item.data.password)
+        if (!match) {
+          throw new Error('Invalid credentials.')
+        }
         const data = merge(transform(items[ 0 ]), { password: args.newPassword })
         item.set(await dataToModel(data))
         if (await repository.update([ item ])) {
@@ -292,7 +303,15 @@ export default (container: App): void => {
     args: { input: 'NewUser!' },
     resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
       const data = await dataToModel(args.input)
-      data.permissions = []
+      let permissions = container.config().get('auth').user.defaultPermissions || []
+      let permissionNames
+      if (permissions.length > 0) {
+        permissions = permissionRepo.find({ name: permissions })
+        data.permissions = permissions.length > 0 ? permissions.map((p: any) => p.getId()) : []
+        permissionNames = permissions.length > 0 ? permissions.map((p: any) => p.data.name) : []
+      } else {
+        data.permissions = []
+      }
       data.status = 'active'
       let newUser: any = repository.parse(data)
       let validation = await newUser.selfValidate()
@@ -302,7 +321,7 @@ export default (container: App): void => {
         let authedUser: any = {
           id: newUser.getId(),
           token: token,
-          permissions: newUser.data.permissions,
+          permissions: permissionNames,
           email: newUser.data.email,
         }
         if (newUser.data.name) {

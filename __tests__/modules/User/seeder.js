@@ -2,6 +2,7 @@ const names = require('./../../../lib').names
 const userFaker = require('./faker')
 const faker = require('faker')
 const permissionSeeder = require('./../Permission/seeder')
+const bcrypt = require('bcrypt')
 
 const userSeeder = async (app, numOfSeeds, password, email = '') => {
   let permission = (await permissionSeeder(app, 1))[0]
@@ -11,6 +12,7 @@ const userSeeder = async (app, numOfSeeds, password, email = '') => {
     let fake = await userFaker(password, email)
     fake.status = faker.random.arrayElement(['pending', 'active', 'banned'])
     fake.permissions = [permission.getId()]
+    fake.password = await bcrypt.hash(password, 10)
     fake = userRepo.parse(fake)
     fakes.push(fake)
   }

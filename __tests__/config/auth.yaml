@@ -4,4 +4,4 @@ admin:
   password: 123456sd
   email: habib@cyber-crafts.com
 user:
-  defaultPermissions: [test]
+  defaultPermissions: [login]
