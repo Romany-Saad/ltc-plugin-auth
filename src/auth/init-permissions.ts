@@ -33,12 +33,16 @@ export const initPermissions = async (app: App) => {
   }
   for (let endpoint in mutationEndpoints) {
     if (databaseEndpoints.indexOf(endpoint) === -1) {
-      newEndpoints.push(permissionsRepo.parse({
+      let data = {
         endpoint: endpoint,
         name: endpoint,
         protected: true,
         type: 'mutation',
-      }))
+      }
+      if (unprotectedEndpoints.indexOf(endpoint) === -1) {
+        data.protected = false
+      }
+      newEndpoints.push(permissionsRepo.parse(data))
     }
   }
   /*for (let endpoint in subscriptionEndpoints) {
@@ -107,3 +111,8 @@ export const initPermissions = async (app: App) => {
       })
   }
 }
+
+const unprotectedEndpoints = [
+  'login',
+  'register'
+]
