@@ -6,4 +6,5 @@ export default class Auth {
     constructor(container: App, authorizaionHeader: string);
     getTokenFromHeader(token: string): string;
     getAuthedUser(): IStringKeyedObject;
+    initUserPermissions(): Promise<any>;
 }
