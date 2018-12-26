@@ -95,6 +95,9 @@ export default (container: App): void => {
       if (!user) {
         throw new Error('can not find user')
       }
+      if (user.data.status === 'banned') {
+        throw new Error('This user is banned.')
+      }
       let permissionsNames: any = await permissionRepo.findByIds(user.data.permissions, 1000)
       if (permissionsNames.length > 0) {
         permissionsNames = permissionsNames.map((permission: any) => {
