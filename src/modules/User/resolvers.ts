@@ -149,7 +149,7 @@ export default (container: App): void => {
       const data = await dataToModel(args.input)
       let permissions = container.config().get('auth').user.defaultPermissions || []
       if (permissions.length > 0) {
-        permissions = permissionRepo.find({ name: permissions })
+        permissions = await permissionRepo.find({ name: {$in: permissions} })
         data.permissions = permissions.length > 0 ? permissions.map((p: any) => p.getId()) : []
       } else {
         data.permissions = []
@@ -309,7 +309,7 @@ export default (container: App): void => {
       let permissions = container.config().get('auth').user.defaultPermissions || []
       let permissionNames
       if (permissions.length > 0) {
-        permissions = permissionRepo.find({ name: permissions })
+        permissions = await permissionRepo.find({ name: {$in: permissions} })
         data.permissions = permissions.length > 0 ? permissions.map((p: any) => p.getId()) : []
         permissionNames = permissions.length > 0 ? permissions.map((p: any) => p.data.name) : []
       } else {
