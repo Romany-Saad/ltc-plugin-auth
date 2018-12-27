@@ -114,5 +114,6 @@ export const initPermissions = async (app: App) => {
 
 const unprotectedEndpoints = [
   'login',
-  'register'
+  'register',
+  'getVideos'
 ]
