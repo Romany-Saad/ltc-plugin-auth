@@ -23,12 +23,16 @@ export const initPermissions = async (app: App) => {
   let newEndpoints = []
   for (let endpoint in queryEndpoints) {
     if (databaseEndpoints.indexOf(endpoint) === -1) {
-      newEndpoints.push(permissionsRepo.parse({
+      let data = {
         endpoint: endpoint,
         name: endpoint,
         protected: true,
         type: 'query',
-      }))
+      }
+      if (unprotectedEndpoints.indexOf(endpoint) === -1) {
+        data.protected = false
+      }
+      newEndpoints.push(permissionsRepo.parse(data))
     }
   }
   for (let endpoint in mutationEndpoints) {
@@ -115,5 +119,7 @@ export const initPermissions = async (app: App) => {
 const unprotectedEndpoints = [
   'login',
   'register',
-  'getVideos'
+  'getVideos',
+  'getModels',
+  'getCompanies'
 ]
