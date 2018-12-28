@@ -49,6 +49,12 @@ export const initPermissions = async (app: App) => {
       newEndpoints.push(permissionsRepo.parse(data))
     }
   }
+  // check if any of the customPermissions isn't in permissions
+  for (let endpoint of customPermissions) {
+    if (databaseEndpoints.indexOf(endpoint.name) === -1) {
+      newEndpoints.push(permissionsRepo.parse(endpoint))
+    }
+  }
   /*for (let endpoint in subscriptionEndpoints) {
     console.log(endpoint)
     if (databaseEndpoints.indexOf(endpoint) === -1) {
@@ -121,5 +127,33 @@ const unprotectedEndpoints = [
   'register',
   'getVideos',
   'getModels',
-  'getCompanies'
+  'getCompanies',
 ]
+
+const customPermissions = [
+  {
+    name: 'postFile',
+    endpoint: 'media',
+    protected: true,
+    type: 'rest',
+  },
+  {
+    name: 'blog.editor.update',
+    endpoint: 'updateArticles',
+    protected: true,
+    type: 'mutation',
+  },
+  {
+    name: 'findOwnFiles',
+    endpoint: 'findFiles',
+    protected: true,
+    type: 'query',
+  },
+  {
+    name: 'deleteOwnVehicles',
+    endpoint: 'deleteVehicles',
+    protected: true,
+    type: 'mutation',
+  },
+]
+

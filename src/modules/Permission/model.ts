@@ -9,6 +9,6 @@ export default class extends BaseModel {
       name: c2v.str.minLength(2).maxLength(128),
       endpoint: c2v.str,
       protected: c2v.bool,
-      type: c2v.str.in('query', 'mutation', 'subscription'),
+      type: c2v.str.in('query', 'mutation', 'subscription', 'rest'),
     })
 }
