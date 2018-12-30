@@ -29,7 +29,7 @@ export const initPermissions = async (app: App) => {
         protected: true,
         type: 'query',
       }
-      if (unprotectedEndpoints.indexOf(endpoint) === -1) {
+      if (unprotectedEndpoints.indexOf(endpoint) > -1) {
         data.protected = false
       }
       newEndpoints.push(permissionsRepo.parse(data))
@@ -43,7 +43,7 @@ export const initPermissions = async (app: App) => {
         protected: true,
         type: 'mutation',
       }
-      if (unprotectedEndpoints.indexOf(endpoint) === -1) {
+      if (unprotectedEndpoints.indexOf(endpoint) > -1) {
         data.protected = false
       }
       newEndpoints.push(permissionsRepo.parse(data))
