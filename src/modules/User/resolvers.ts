@@ -187,7 +187,7 @@ export default (container: App): void => {
       if (items.length > 0) {
         const item = items[ 0 ]
         const data = merge(transform(items[ 0 ]), args.input)
-        item.set(await dataToModel(data))
+        item.set(data)
         if (await repository.update([ item ])) {
           return transform(item)
         }
@@ -227,7 +227,7 @@ export default (container: App): void => {
       if (items.length > 0) {
         const item = items[ 0 ]
         const data = merge(transform(items[ 0 ]), { email: args.newEmail })
-        item.set(await dataToModel(data))
+        item.set(data)
         if (await repository.update([ item ])) {
           return true
         }
