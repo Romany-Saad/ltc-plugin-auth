@@ -12,7 +12,7 @@ export const initPermissions = async (app: App) => {
   // get existing endpoints in database
   const databasesPermissions = await permissionsRepo.find({}, 0)
   let databaseEndpoints = databasesPermissions.map(permission => {
-    return permission.data.endpoint
+    return permission.data.name
   })
   // get all endpoints from plugins
   let queryEndpoints = schemaComposer.rootQuery().getFields()
