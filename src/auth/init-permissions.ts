@@ -155,5 +155,17 @@ const customPermissions = [
     protected: true,
     type: 'mutation',
   },
+  {
+    name: 'admin.addProfile',
+    endpoint: 'addProfile',
+    protected: true,
+    type: 'mutation',
+  },
+  {
+    name: 'admin.updateProfile',
+    endpoint: 'updateProfile',
+    protected: true,
+    type: 'mutation',
+  },
 ]
 
