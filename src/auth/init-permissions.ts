@@ -1,11 +1,11 @@
-import App from '@lattice/core'
+import App, { IStringKeyedObject } from '@lattice/core'
 import { schemaComposer } from 'graphql-compose'
 import AMongoDbRepository from 'ltc-plugin-mongo/lib/abstractions/AMongoDbRepository'
 import { names } from '../index'
 import { names as mailNames } from 'ltc-plugin-mail'
 import bcrypt = require('bcrypt')
 
-export const initPermissions = async (app: App) => {
+export const initPermissions = async (app: App, unprotectedEndpoints: string[] = [], customPermissions: IStringKeyedObject[]) => {
   // repository declarations
   const permissionsRepo = app.get<AMongoDbRepository<any>>(names.AUTH_PERMISSIONS_REPOSITORY)
   const userRepo = app.get<AMongoDbRepository<any>>(names.AUTH_USERS_REPOSITORY)
@@ -122,50 +122,4 @@ export const initPermissions = async (app: App) => {
   }
 }
 
-const unprotectedEndpoints = [
-  'login',
-  'register',
-  'getVideos',
-  'getModels',
-  'getCompanies',
-]
-
-const customPermissions = [
-  {
-    name: 'postFile',
-    endpoint: 'media',
-    protected: true,
-    type: 'rest',
-  },
-  {
-    name: 'blog.editor.update',
-    endpoint: 'updateArticles',
-    protected: true,
-    type: 'mutation',
-  },
-  {
-    name: 'findOwnFiles',
-    endpoint: 'findFiles',
-    protected: true,
-    type: 'query',
-  },
-  {
-    name: 'deleteOwnVehicles',
-    endpoint: 'deleteVehicles',
-    protected: true,
-    type: 'mutation',
-  },
-  {
-    name: 'admin.addProfile',
-    endpoint: 'addProfile',
-    protected: true,
-    type: 'mutation',
-  },
-  {
-    name: 'admin.updateProfile',
-    endpoint: 'updateProfile',
-    protected: true,
-    type: 'mutation',
-  },
-]
 

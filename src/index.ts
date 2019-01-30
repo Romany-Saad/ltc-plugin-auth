@@ -1,4 +1,4 @@
-import App, { contracts, names as coreNames } from '@lattice/core'
+import App, { contracts, IStringKeyedObject, names as coreNames } from '@lattice/core'
 import { IConfiguration } from '@lattice/core/lib/contracts'
 import resolvers from './schema/resolvers'
 import Connection from 'ltc-plugin-mongo/lib/Connection'
@@ -20,9 +20,13 @@ export default class implements contracts.IPlugin {
 
   name: string = 'cyber-crafts.cms-plugin-auth'
   private resolvers: object
+  private unprotectedEndpoints: string[]
+  private customPermissions: IStringKeyedObject[]
 
-  constructor () {
 
+  constructor (unprotectedEndpoints: string[] = [], customPermissions: IStringKeyedObject[]) {
+    this.unprotectedEndpoints = unprotectedEndpoints
+    this.customPermissions = customPermissions
   }
 
   /*
@@ -48,7 +52,7 @@ export default class implements contracts.IPlugin {
     resolvers(container)
 
     container.emitter.on(coreNames.EV_PLUGINS_LOADED, (items: any) => {
-      initPermissions(container)
+      initPermissions(container, this.unprotectedEndpoints, this.customPermissions)
         .catch(err => {
           throw new Error(err)
         })

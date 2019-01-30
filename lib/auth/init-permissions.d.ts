@@ -1,2 +1,2 @@
-import App from '@lattice/core';
-export declare const initPermissions: (app: App) => Promise<void>;
+import App, { IStringKeyedObject } from '@lattice/core';
+export declare const initPermissions: (app: App, unprotectedEndpoints: string[], customPermissions: IStringKeyedObject[]) => Promise<void>;

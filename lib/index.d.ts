@@ -1,4 +1,4 @@
-import App, { contracts } from '@lattice/core';
+import App, { contracts, IStringKeyedObject } from '@lattice/core';
 export declare const names: {
     AUTH_PERMISSIONS_REPOSITORY: symbol;
     AUTH_USERS_REPOSITORY: symbol;
@@ -7,6 +7,8 @@ export declare const names: {
 export default class implements contracts.IPlugin {
     name: string;
     private resolvers;
-    constructor();
+    private unprotectedEndpoints;
+    private customPermissions;
+    constructor(unprotectedEndpoints: string[], customPermissions: IStringKeyedObject[]);
     load(container: App): Promise<void>;
 }
