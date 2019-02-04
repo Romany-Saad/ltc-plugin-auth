@@ -5,3 +5,5 @@ admin:
   email: habib@cyber-crafts.com
 user:
   defaultPermissions: [login]
+
+registerMessage: <h3>Welcome <<name>>, </h3><br> <p>Your registration is successful</p>

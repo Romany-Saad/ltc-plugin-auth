@@ -149,7 +149,7 @@ export default (container: App): void => {
       const data = await dataToModel(args.input)
       let permissions = container.config().get('auth').user.defaultPermissions || []
       if (permissions.length > 0) {
-        permissions = await permissionRepo.find({ name: {$in: permissions} })
+        permissions = await permissionRepo.find({ name: { $in: permissions } })
         data.permissions = permissions.length > 0 ? permissions.map((p: any) => p.getId()) : []
       } else {
         data.permissions = []
@@ -159,6 +159,25 @@ export default (container: App): void => {
       let validation = await newUser.selfValidate()
       if (validation.success) {
         newUser = (await repository.insert([ newUser ]))[ 0 ]
+        let transporter: any = container.get(mailNames.MAIL_TRANSPORTER_SERVICE)
+        let msg: string = container.config().get('auth.registerMessage')
+        if (msg) {
+          msg = msg.replace(/<<name>>/, data.name)
+        } else {
+          msg = `<h3>Welcome ${data.name}, </h3><br> <p>Your registration is successful</p>`
+        }
+        let mailOptions = {
+          from: 'admin', // sender address
+          to: data.email, // list of receivers
+          subject: 'Hassan Kutbi - Welcome to Arabian drive', // Subject line
+          html: msg, // html body
+        }
+        try {
+          await transporter.sendMail(mailOptions)
+        }
+        catch (e) {
+          console.log(e)
+        }
         return transform(newUser)
       } else {
         throw new Error(JSON.stringify(validation.errors[ 0 ]))
@@ -309,7 +328,7 @@ export default (container: App): void => {
       let permissions = container.config().get('auth').user.defaultPermissions || []
       let permissionNames
       if (permissions.length > 0) {
-        permissions = await permissionRepo.find({ name: {$in: permissions} })
+        permissions = await permissionRepo.find({ name: { $in: permissions } })
         data.permissions = permissions.length > 0 ? permissions.map((p: any) => p.getId()) : []
         permissionNames = permissions.length > 0 ? permissions.map((p: any) => p.data.name) : []
       } else {
@@ -329,6 +348,25 @@ export default (container: App): void => {
         }
         if (newUser.data.name) {
           authedUser.name = newUser.data.name
+        }
+        let transporter: any = container.get(mailNames.MAIL_TRANSPORTER_SERVICE)
+        let msg: string = container.config().get('auth.registerMessage')
+        if (msg) {
+          msg = msg.replace(/<<name>>/, data.name)
+        } else {
+          msg = `<h3>Welcome ${data.name}, </h3><br> <p>Your registration is successful</p>`
+        }
+        let mailOptions = {
+          from: 'admin', // sender address
+          to: data.email, // list of receivers
+          subject: 'Hassan Kutbi - Welcome to Arabian drive', // Subject line
+          html: msg, // html body
+        }
+        try {
+          await transporter.sendMail(mailOptions)
+        }
+        catch (e) {
+          console.log(e)
         }
         return authedUser
       } else {

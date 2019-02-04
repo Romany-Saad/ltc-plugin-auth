@@ -34,7 +34,7 @@ describe('given schema is the GraphQlSchema object loaded with schemas from User
     const x = await graphql(schema, q, null, null, {data})
     expect(x).toHaveProperty('data.register.email')
     expect(x).toHaveProperty('data.register.id')
-  })
+  }, 10000)
 
   it('should login a User if data is valid and returns AuthedUser', async () => {
     const q = `query login($email: String!, $password: String!) { login (email: $email, password: $password) { id , email, permissions, token } }`
