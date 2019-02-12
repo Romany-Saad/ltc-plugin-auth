@@ -1,6 +1,6 @@
 import App from '@lattice/core/lib/App'
 import { Permission, Permissions } from './'
-import { merge } from 'lodash'
+import { merge } from '../../utils'
 import { names } from '../../index'
 import './schema'
 import { ResolveParams, schemaComposer } from 'graphql-compose'
