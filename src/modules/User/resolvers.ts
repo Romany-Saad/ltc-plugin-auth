@@ -98,12 +98,12 @@ export default (container: App): void => {
       if (user.data.status === 'banned') {
         throw new Error('This user is banned.')
       }
-      let permissionsNames: any = await permissionRepo.findByIds(user.data.permissions, 1000)
+      /*let permissionsNames: any = await permissionRepo.findByIds(user.data.permissions, 1000)
       if (permissionsNames.length > 0) {
         permissionsNames = permissionsNames.map((permission: any) => {
           return permission.data.name
         })
-      }
+      }*/
       let serializedUser: IStringKeyedObject = transform(user)
       return bcrypt.compare(args.password, serializedUser.password)
         .then((res: Boolean) => {
@@ -112,7 +112,7 @@ export default (container: App): void => {
             let authedUser: any = {
               id: user.getId(),
               token: token,
-              permissions: permissionsNames,
+              permissions: user.data.permissions,
               email: user.data.email,
             }
             if (user.data.name) {
@@ -150,7 +150,8 @@ export default (container: App): void => {
       let permissions = container.config().get('auth').user.defaultPermissions || []
       if (permissions.length > 0) {
         permissions = await permissionRepo.find({ name: { $in: permissions } })
-        data.permissions = permissions.length > 0 ? permissions.map((p: any) => p.getId()) : []
+        data.permissions = permissions.length > 0 ? permissions
+          .map((p: any) => {return {name: p.data.name, data: {}}}) : []
       } else {
         data.permissions = []
       }
@@ -326,11 +327,12 @@ export default (container: App): void => {
     resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
       const data = await dataToModel(args.input)
       let permissions = container.config().get('auth').user.defaultPermissions || []
-      let permissionNames
+      // let permissionNames
       if (permissions.length > 0) {
         permissions = await permissionRepo.find({ name: { $in: permissions } })
-        data.permissions = permissions.length > 0 ? permissions.map((p: any) => p.getId()) : []
-        permissionNames = permissions.length > 0 ? permissions.map((p: any) => p.data.name) : []
+        data.permissions = permissions.length > 0 ? permissions
+          .map((p: any) => {return {name: p.data.name, data: {}}}) : []
+        // permissionNames = permissions.length > 0 ? permissions.map((p: any) => p.data.name) : []
       } else {
         data.permissions = []
       }
@@ -343,7 +345,7 @@ export default (container: App): void => {
         let authedUser: any = {
           id: newUser.getId(),
           token: token,
-          permissions: permissionNames,
+          permissions: data.permissions,
           email: newUser.data.email,
         }
         if (newUser.data.name) {

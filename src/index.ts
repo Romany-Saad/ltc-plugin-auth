@@ -51,7 +51,37 @@ export default class implements contracts.IPlugin {
 
     resolvers(container)
 
-    container.emitter.on(coreNames.EV_PLUGINS_LOADED, (items: any) => {
+    container.emitter.on(coreNames.EV_PLUGINS_LOADED, async (items: any) => {
+      // get all users
+      const currentUsers: any = await users.find({}, 0)
+      // get all permissions
+      const currentPermissions: any = await permissions.find({}, 0)
+
+      // for every user replace his permissions with array of objects
+      let toBeUpdated = []
+      for (let user of currentUsers) {
+        if (typeof user.data.permissions[0] === 'string') {
+          const newPermissions = user.data.permissions.map((p: string) => {
+            //  get current permission
+            const perm = currentPermissions.find((permission: any) => p === permission.getId())
+            //  return permission object
+            return {
+              name: perm.data.name,
+              data: {}
+            }
+          })
+          user.set({
+            permissions: newPermissions,
+          })
+          toBeUpdated.push(user)
+        }
+      }
+      // update all users
+      if (toBeUpdated.length > 0) {
+        users.update(toBeUpdated)
+          .catch(e => console.log(e))
+      }
+
       initPermissions(container, this.unprotectedEndpoints, this.customPermissions)
         .catch(err => {
           throw new Error(err)
