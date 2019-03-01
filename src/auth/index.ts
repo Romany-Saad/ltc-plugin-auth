@@ -29,7 +29,9 @@ export default class Auth {
     let permissionsNames
     if (permissions.length > 0) {
       permissions = await permissionRepo.findByIds(permissions)
-      permissionsNames = permissions.length > 0 ? permissions.map((p: any) => p.data.name) : []
+      permissionsNames = permissions.length > 0 ? permissions.map((p: any) => {
+        return { name: p.data.name, data: {} }
+      }) : []
     } else {
       permissionsNames = []
     }

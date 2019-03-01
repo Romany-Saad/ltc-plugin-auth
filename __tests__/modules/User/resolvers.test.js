@@ -30,19 +30,19 @@ describe('given schema is the GraphQlSchema object loaded with schemas from User
 
   it('should register a User if data is valid and returns AuthedUser', async () => {
     const data = await fake('123456sd', null)
-    const q = `mutation register($data: NewUser!) { register (input: $data) { id , email, permissions } }`
+    const q = `mutation register($data: NewUser!) { register (input: $data) { id , email, permissions{name} } }`
     const x = await graphql(schema, q, null, null, {data})
     expect(x).toHaveProperty('data.register.email')
     expect(x).toHaveProperty('data.register.id')
   }, 10000)
 
   it('should login a User if data is valid and returns AuthedUser', async () => {
-    const q = `query login($email: String!, $password: String!) { login (email: $email, password: $password) { id , email, permissions, token } }`
+    const q = `query login($email: String!, $password: String!) { login (email: $email, password: $password) { id , email, permissions{name}, token } }`
     const x = await graphql(schema, q, null, null, {email: instance.data.email, password: '123456sd'})
     token = x.data.login.token
     expect(x).toHaveProperty('data.login.email')
     expect(x).toHaveProperty('data.login.id')
-    expect(typeof x.data.login.permissions[0]).toBe('string')
+    expect(typeof x.data.login.permissions[0].name).toBe('string')
   })
 
   it('should return User data on Mutation.changePassword()', async () => {

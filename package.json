@@ -22,17 +22,17 @@
     "@lattice/core": "git+ssh://git@bitbucket.org/cyber-crafts/lattice-core.git",
     "@types/bcrypt": "^2.0.0",
     "@types/jwt-simple": "^0.5.33",
-    "bcrypt": "^3.0.3",
+    "bcrypt": "^3.0.4",
     "jwt-simple": "^0.5.1",
     "ltc-plugin-config": "git+ssh://git@bitbucket.org/cyber-crafts/ltc-plugin-config.git",
+    "ltc-plugin-graphql": "git+ssh://git@bitbucket.org/cyber-crafts/ltc-plugin-graphql.git",
     "ltc-plugin-mail": "git+ssh://git@bitbucket.org/cyber-crafts/ltc-plugin-mail.git",
     "ltc-plugin-mongo": "git+ssh://git@bitbucket.org/cyber-crafts/ltc-plugin-mongo.git",
-    "randexp": "^0.5.3",
-    "ltc-plugin-graphql": "git+ssh://git@bitbucket.org/cyber-crafts/ltc-plugin-graphql.git"
+    "randexp": "^0.5.3"
   },
   "devDependencies": {
     "@types/jest": "^22.2.3",
-    "@types/node": "^9.6.41",
+    "@types/node": "^9.6.42",
     "faker": "^4.1.0",
     "jest": "^22.4.3",
     "pre-commit": "^1.2.2"

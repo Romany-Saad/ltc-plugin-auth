@@ -29,7 +29,7 @@ type AuthedUser {
     id: ID!
     name: String
     token: String!
-    permissions: [String!]!
+    permissions: [UserPermission!]!
     email: String!
 }`)
 
