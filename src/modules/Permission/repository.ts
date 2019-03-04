@@ -9,16 +9,22 @@ export default class extends AMongoDbRepository<Permission> {
   }
 
   setNameIndex () {
-    this.collection.indexExists('permission.name')
-      .then(bool => {
-        if (!bool) {
-          this.collection.createIndexes([{
-              name: 'permission.name',
-              key: {name: 1},
-              unique: true,
-            }])
-            .catch(err => {
-              console.log(err)
+    this.client.db().collections()
+      .then(collections => {
+        const collectionsNames = collections.map(c => c.collectionName)
+        if (collectionsNames.indexOf('permissions') > -1) {
+          this.collection.indexExists('permission.name')
+            .then(async bool => {
+              if (!bool) {
+                this.collection.createIndexes([ {
+                  name: 'permission.name',
+                  key: { 'name': 1 },
+                  unique: true,
+                } ])
+                  .catch(err => {
+                    console.log(err)
+                  })
+              }
             })
         }
       })
