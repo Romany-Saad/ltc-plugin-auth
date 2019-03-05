@@ -66,20 +66,34 @@ export const initPermissions = async (app: App, unprotectedEndpoints: string[] =
       }))
     }
   }*/
+  // TODO: find a way around this
   if (newEndpoints.length) {
     permissionsRepo.insert(newEndpoints)
       .then(async permissions => {
-        let permissionsIds = permissions.map(permission => {
-          return permission.getId()
-        })
         let userConfig = app.config().get('auth').admin
         // check if admin user already exists
         let user = (await userRepo.find({ email: userConfig.email }))[ 0 ]
         // if exists and permissions > 0 then update
         if (user) {
           if (permissions.length > 0) {
-            let allPermissions = user.data.permissions.concat(permissionsIds)
-            allPermissions = [ ...new Set(allPermissions) ]
+            // check if the old permissions were ids or objects
+            // if ids then convert them to objects
+            const allPermissions = []
+            for (let permission of user.data.permissions) {
+              if (typeof permission === 'string') {
+                let current = databasesPermissions.find(p => p.getId() === permission)
+                allPermissions.push({
+                  name: current.data.name,
+                  data: {}
+                })
+              } else {
+                allPermissions.push(permission)
+              }
+            }
+            // push the new permissions to allPermissions and then replace in user
+            allPermissions.push(...permissions.map(p => {
+              return { name: p.data.name, data: {} }
+            }))
             user.set({ permissions: allPermissions })
             userRepo.update([ user ])
               .catch(err => {
@@ -92,14 +106,22 @@ export const initPermissions = async (app: App, unprotectedEndpoints: string[] =
             email: userConfig.email,
             password: await bcrypt.hash(userConfig.password, 10),
             status: 'active',
-            permissions: permissionsIds,
+            permissions: permissions.map(p => {
+              return { name: p.data.name, data: {} }
+            }),
             name: userConfig.name,
           }
           let newUser = userRepo.parse(userData)
-          userRepo.insert([ newUser ])
-            .catch(err => {
-              throw new Error(err)
-            })
+          console.log('user data', JSON.stringify(newUser, null, '\t'))
+          let validation = await newUser.selfValidate()
+          if (validation.success) {
+            userRepo.insert([ newUser ])
+              .catch(err => {
+                throw new Error(err)
+              })
+          } else {
+            console.log(validation)
+          }
           //  send the user data to the specified email
           let transporter: any = app.get(mailNames.MAIL_TRANSPORTER_SERVICE)
           let mailOptions = {
