@@ -32,6 +32,7 @@ describe('given schema is the GraphQlSchema object loaded with schemas from Pass
   it('should insert a PasswordReset if data is valid', async () => {
     // const data = fake(user)
     const email = user.data.email
+    console.log(user.get('email'))
     const q = `mutation resetPassword($email: String!) { resetPassword ( email: $email)}`
     const x = await graphql(schema, q, null, null, {email})
     expect(x.data.resetPassword).toBe(true)

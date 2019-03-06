@@ -28,7 +28,7 @@ export default class Auth {
     let permissions = user.data.permissions.map((p: any) => p.name)
     let permissionsNames
     if (permissions.length > 0) {
-      permissions = await permissionRepo.find({ name: { $in: permissions } })
+      permissions = await permissionRepo.find({ name: { $in: permissions }}, 1000)
       permissionsNames = permissions.length > 0 ? permissions.map((p: any) => {
         return { name: p.data.name, data: {} }
       }) : []

@@ -112,7 +112,6 @@ export const initPermissions = async (app: App, unprotectedEndpoints: string[] =
             name: userConfig.name,
           }
           let newUser = userRepo.parse(userData)
-          console.log('user data', JSON.stringify(newUser, null, '\t'))
           let validation = await newUser.selfValidate()
           if (validation.success) {
             userRepo.insert([ newUser ])

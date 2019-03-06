@@ -1,4 +1,4 @@
-database: __testing__cyber-crafts_cms-plugin-auth
+database: __cms_plugin_auth_testing
 collectionPrefix: _ltc
 host: localhost
 port: 27017
