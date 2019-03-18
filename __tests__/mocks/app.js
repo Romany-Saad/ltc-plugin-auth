@@ -70,4 +70,5 @@ async function registerPluginsAndInitApp() {
   return app
 }
 
-module.exports = registerPluginsAndInitApp
+// module.exports = registerPluginsAndInitApp
+module.exports = app

@@ -46,5 +46,8 @@
     "faker": "^4.1.0",
     "jest": "^22.4.3",
     "pre-commit": "^1.2.2"
+  },
+  "dependencies": {
+    "express-list-endpoints": "^4.0.0"
   }
 }

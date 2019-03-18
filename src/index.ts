@@ -12,6 +12,7 @@ import { initPermissions } from './auth/init-permissions'
 
 export const names = {
   AUTH_PERMISSIONS_REPOSITORY: Symbol(namer.resolve('auth', 'permissions', 'repository')),
+  AUTH_PERMISSIONS_GRAPHQL_CONFIG: Symbol(namer.resolve('auth', 'permissions', 'config')),
   AUTH_USERS_REPOSITORY: Symbol(namer.resolve('auth', 'users', 'repository')),
   AUTH_PASSWORD_RESET_REPOSITORY: Symbol(namer.resolve('auth', 'passwordResets', 'repository')),
 }
@@ -22,7 +23,7 @@ export default class implements contracts.IPlugin {
   private resolvers: object
   private unprotectedEndpoints: string[]
   private customPermissions: IStringKeyedObject[]
-
+  public authConfig: IStringKeyedObject
 
   constructor (unprotectedEndpoints: string[] = [], customPermissions: IStringKeyedObject[]) {
     this.unprotectedEndpoints = unprotectedEndpoints
@@ -60,4 +61,11 @@ export default class implements contracts.IPlugin {
 
   }
 
+  setGraphQlAuthConfig (config: IStringKeyedObject[]) {
+    this.authConfig.graphQl = config
+  }
+
+  setRestAuthConfig (config: IStringKeyedObject) {
+    this.authConfig.graphQl = config
+  }
 }

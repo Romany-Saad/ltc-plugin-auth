@@ -24,7 +24,7 @@ export default (container: App): void => {
 
 
   // Queries ===================================
-  PermissionTC.addResolver({
+  /*PermissionTC.addResolver({
     name: 'getPermission',
     type: 'Permission!',
     args: { id: 'ID!' },
@@ -32,26 +32,27 @@ export default (container: App): void => {
       const items = await repository.findByIds([ args.id ])
       return (items.length !== 1) ? undefined : transform(items[ 0 ])
     },
-  })
+  })*/
   PermissionTC.addResolver({
     name: 'getPermissions',
     type: '[Permission!]!',
     args: { skip: 'Int', limit: 'Int', filter: 'JSON' },
-    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
-      const distributionCenters = await repository.find(args.filter, args.limit, args.skip)
-      return distributionCenters.map(transform)
+    resolve: async ({ source, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+      const permissions = source.get(names.AUTH_PERMISSIONS_GRAPHQL_CONFIG)
+      return permissions
     },
   })
   PermissionTC.addResolver({
     name: 'countPermissions',
     type: 'Int!',
     args: { filter: 'JSON' },
-    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
-      return await repository.count(args.filter)
+    resolve: async ({ source, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+      const permissions = source.get<any[]>(names.AUTH_PERMISSIONS_GRAPHQL_CONFIG)
+      return permissions.length
     },
   })
 
-  schemaComposer.rootQuery().addFields({ getPermission: PermissionTC.getResolver('getPermission') })
+  // schemaComposer.rootQuery().addFields({ getPermission: PermissionTC.getResolver('getPermission') })
   schemaComposer.rootQuery().addFields({ getPermissions: PermissionTC.getResolver('getPermissions') })
   schemaComposer.rootQuery().addFields({ countPermissions: PermissionTC.getResolver('countPermissions') })
 
@@ -78,7 +79,7 @@ export default (container: App): void => {
           }
       }
   })*/
-  PermissionTC.addResolver({
+  /*PermissionTC.addResolver({
     name: 'deletePermission',
     type: 'Boolean!',
     args: { id: 'ID!' },
@@ -132,5 +133,5 @@ export default (container: App): void => {
   // schemaComposer.rootMutation().addFields({addPermission: PermissionTC.getResolver('addPermission')})
   schemaComposer.rootMutation().addFields({ deletePermission: PermissionTC.getResolver('deletePermission') })
   schemaComposer.rootMutation().addFields({ enablePermission: PermissionTC.getResolver('enablePermission') })
-  schemaComposer.rootMutation().addFields({ disablePermission: PermissionTC.getResolver('disablePermission') })
+  schemaComposer.rootMutation().addFields({ disablePermission: PermissionTC.getResolver('disablePermission') })*/
 }
