@@ -11,8 +11,10 @@ export default class implements contracts.IPlugin {
     private unprotectedEndpoints;
     private customPermissions;
     authConfig: IStringKeyedObject;
+    availablePermissions: IStringKeyedObject[];
     constructor(unprotectedEndpoints: string[], customPermissions: IStringKeyedObject[]);
     load(container: App): Promise<void>;
     setGraphQlAuthConfig(config: IStringKeyedObject[]): void;
-    setRestAuthConfig(config: IStringKeyedObject): void;
+    setRestAuthConfig(config: IStringKeyedObject[]): void;
+    setAvailablePermissions(customPermissions?: IStringKeyedObject[]): void;
 }

@@ -9,6 +9,7 @@ import { Permissions } from './modules/Permission'
 import { Users } from './modules/User'
 import { PasswordResets } from './modules/PasswordReset'
 import { initPermissions } from './auth/init-permissions'
+import userListener from './modules/User/listener'
 
 export const names = {
   AUTH_PERMISSIONS_REPOSITORY: Symbol(namer.resolve('auth', 'permissions', 'repository')),
@@ -23,7 +24,8 @@ export default class implements contracts.IPlugin {
   private resolvers: object
   private unprotectedEndpoints: string[]
   private customPermissions: IStringKeyedObject[]
-  public authConfig: IStringKeyedObject
+  public authConfig: IStringKeyedObject = {}
+  public availablePermissions: IStringKeyedObject[]
 
   constructor (unprotectedEndpoints: string[] = [], customPermissions: IStringKeyedObject[]) {
     this.unprotectedEndpoints = unprotectedEndpoints
@@ -54,18 +56,37 @@ export default class implements contracts.IPlugin {
 
     container.emitter.on(coreNames.EV_PLUGINS_LOADED, async (items: any) => {
       initPermissions(container, this.unprotectedEndpoints, this.customPermissions)
+        .then(() => console.log('init permissions done'))
         .catch(err => {
           throw new Error(err)
         })
     })
 
+    userListener(container)
   }
 
   setGraphQlAuthConfig (config: IStringKeyedObject[]) {
     this.authConfig.graphQl = config
   }
 
-  setRestAuthConfig (config: IStringKeyedObject) {
-    this.authConfig.graphQl = config
+  setRestAuthConfig (config: IStringKeyedObject[]) {
+    this.authConfig.rest = config
+  }
+
+  setAvailablePermissions (customPermissions: IStringKeyedObject[] = null) {
+    this.availablePermissions = []
+    this.availablePermissions.push(...this.authConfig.rest.map((config: any) => {
+      return { name: config.endpoint, description: '' }
+    }))
+    this.availablePermissions.push(...this.authConfig.graphQl.map((config: any) => {
+      return { name: config.endpoint, description: '' }
+    }))
+    if (customPermissions) {
+      this.availablePermissions.push(...customPermissions.map((config: any) => {
+        return { name: config.endpoint, description: config.description }
+      }))
+    }
   }
 }
+
+// TODO: auth needs general testing
