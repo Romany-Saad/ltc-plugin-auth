@@ -24,10 +24,7 @@ export default class Auth {
   async initUserPermissions () {
     const userRepo = this.app.get<AMongoDbRepository<any>>(names.AUTH_USERS_REPOSITORY)
     let user = (await userRepo.findByIds([ this.authorizationData.userId ]))[ 0 ]
-    let permissions = user.data.permissions.map((p: any) => {
-      return { name: p.data.name, data: {} }
-    })
-    this.authorizationData.permissions = permissions
+    this.authorizationData.permissions = user.data.permissions
     return this.authorizationData.permissions
   }
 }
