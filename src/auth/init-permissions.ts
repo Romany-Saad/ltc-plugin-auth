@@ -7,23 +7,12 @@ import bcrypt = require('bcrypt')
 import { graphQlDefaultAuth, restDefaultAuth } from './helpers'
 
 export const initPermissions = async (app: App, unprotectedEndpoints: string[] = [], customPermissions: IStringKeyedObject[]) => {
-  // get auth configs
   const authConfigs = loadAuthConfigs(app, unprotectedEndpoints)
-  // store them on plugin
   const authPlugin: any = app.getPlugin('cyber-crafts.cms-plugin-auth')
   authPlugin.setGraphQlAuthConfig(authConfigs.graphql)
   authPlugin.setRestAuthConfig(authConfigs.rest)
   authPlugin.setAvailablePermissions(customPermissions)
-  // repository declarations
-  // store them on plugin
-  // repository declarations
-  const userRepo = app.get<AMongoDbRepository<any>>(names.AUTH_USERS_REPOSITORY)
-
-  // check if any of the customPermissions isn't in permissions
-//  TODO: set the admin creation / update part in an event that would be handled by user listener
-
   app.emitter.emit('PERMISSIONS_INIT_DONE', authPlugin.availablePermissions)
-
 }
 
 function loadAuthConfigs (app: App, unprotectedEndpoints: string[]) {

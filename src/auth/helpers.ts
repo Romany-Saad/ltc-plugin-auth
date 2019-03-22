@@ -1,13 +1,25 @@
 import App, { IStringKeyedObject } from '@lattice/core'
 
-//TODO: figure out the logic for these 2
-
 export const graphQlDefaultAuth = (next: any) => (rp: any) => {
-  return next(rp)
+  // get the endpoint
+  const endpoint = 'something'
+  // check if user permissions has endpoint
+  if (rp.context.user && rp.context.user.permissions.find((p: any) => p.name === endpoint) != undefined) {
+    return next(rp)
+  }
+  else {
+    throw new Error('permissions denied')
+  }
 }
 
 export const restDefaultAuth = (req: any, res: any, next: any) => {
-  next()
+  const endpoint = req.url
+  if (req.user && req.user.permissions.find((p: any) => p.name === endpoint) != undefined) {
+    next()
+  }
+  else {
+    throw new Error('permissions denied')
+  }
 }
 
 
