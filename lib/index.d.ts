@@ -8,11 +8,10 @@ export declare const names: {
 export default class implements contracts.IPlugin {
     name: string;
     private resolvers;
-    private unprotectedEndpoints;
-    private customPermissions;
+    private customData;
     authConfig: IStringKeyedObject;
     availablePermissions: IStringKeyedObject[];
-    constructor(unprotectedEndpoints: string[], customPermissions: IStringKeyedObject[]);
+    constructor(customData: IStringKeyedObject);
     load(container: App): Promise<void>;
     setGraphQlAuthConfig(config: IStringKeyedObject[]): void;
     setRestAuthConfig(config: IStringKeyedObject[]): void;

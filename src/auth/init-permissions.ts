@@ -1,64 +1,48 @@
 import App, { IStringKeyedObject } from '@lattice/core'
 import { schemaComposer } from 'graphql-compose'
-import AMongoDbRepository from 'ltc-plugin-mongo/lib/abstractions/AMongoDbRepository'
-import { names } from '../index'
-import { names as mailNames } from 'ltc-plugin-mail'
-import bcrypt = require('bcrypt')
-import { graphQlDefaultAuth, restDefaultAuth } from './helpers'
+import { restDefaultAuth } from './helpers'
 
-export const initPermissions = async (app: App, unprotectedEndpoints: string[] = [], customPermissions: IStringKeyedObject[]) => {
-  const authConfigs = loadAuthConfigs(app, unprotectedEndpoints)
+export const initPermissions = async (app: App, customData: IStringKeyedObject) => {
+  const authConfigs = loadAuthConfigs(app)
   const authPlugin: any = app.getPlugin('cyber-crafts.cms-plugin-auth')
-  authPlugin.setGraphQlAuthConfig(authConfigs.graphql)
-  authPlugin.setRestAuthConfig(authConfigs.rest)
-  authPlugin.setAvailablePermissions(customPermissions)
+  authPlugin.setGraphQlAuthConfig([...authConfigs.graphql, ...customData.authConfigs.graphql])
+  authPlugin.setRestAuthConfig([...authConfigs.rest, ...customData.authConfigs.rest])
+  authPlugin.setAvailablePermissions(customData.permissions)
   app.emitter.emit('PERMISSIONS_INIT_DONE', authPlugin.availablePermissions)
 }
 
-function loadAuthConfigs (app: App, unprotectedEndpoints: string[]) {
+function loadAuthConfigs (app: App) {
   const graphqlAuthConfigs = getGraphQlAuthConfigs()
   const restEndpoints = getAvailableRoutes(app)
-  const restAuthConfigs = restEndpoints.map((endpoint: IStringKeyedObject)=> {
-    endpoint.authorize = restDefaultAuth
+  const restAuthConfigs = restEndpoints.map((endpoint: IStringKeyedObject) => {
+    endpoint.authorize = restDefaultAuth(endpoint.path)
     return endpoint
   })
   return {
-    graphql : graphqlAuthConfigs,
-    rest : restAuthConfigs,
+    graphql: graphqlAuthConfigs,
+    rest: restAuthConfigs,
   }
 }
 
 function getGraphQlAuthConfigs () {
-  let queryEndpoints = schemaComposer.rootQuery().getFields()
-  let mutationEndpoints = schemaComposer.rootMutation().getFields()
-  const graphqlAuthConfigs = []
-  for (let endpoint in queryEndpoints) {
-    let data = {
-      endpoint: endpoint,
-      name: endpoint,
-      protected: true,
-      type: 'query',
-      authorize: graphQlDefaultAuth
-    }
-    /*if (unprotectedEndpoints.indexOf(endpoint) > -1) {
-      data.protected = false
-    }*/
-    graphqlAuthConfigs.push(data)
-  }
-  for (let endpoint in mutationEndpoints) {
-    let data = {
-      endpoint: endpoint,
-      name: endpoint,
-      protected: true,
-      type: 'mutation',
-      authorize: graphQlDefaultAuth
-    }
-    /*if (unprotectedEndpoints.indexOf(endpoint) > -1) {
-      data.protected = false
-    }*/
-    graphqlAuthConfigs.push(data)
-  }
+  let queryEndpoints: any = schemaComposer.rootQuery().getFields()
+  let mutationEndpoints: any = schemaComposer.rootMutation().getFields()
+  const queryAuthConfigs = generateGraphqlEndpointsConfig(queryEndpoints, 'query')
+  const mutationAuthConfigs = generateGraphqlEndpointsConfig(mutationEndpoints, 'mutation')
+  const graphqlAuthConfigs = [ ...queryAuthConfigs, ...mutationAuthConfigs ]
   return graphqlAuthConfigs
+}
+
+function generateGraphqlEndpointsConfig (endpoints: string[], endpointsType: string) {
+  const configs = []
+  for (let endpoint in endpoints) {
+    let data: any = {
+      endpoint: endpoint,
+      type: endpointsType,
+    }
+    configs.push(data)
+  }
+  return configs
 }
 
 function getAvailableRoutes (app: App) {

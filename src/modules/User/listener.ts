@@ -6,37 +6,33 @@ import { names } from '../../index'
 export default (app: App) => {
   app.emitter.on('PERMISSIONS_INIT_DONE', async (data) => {
     const userRepo = app.get<AMongoDbRepository<any>>(names.AUTH_USERS_REPOSITORY)
-/*
-    let userConfig = app.config().get('auth').admin
+    /*let userConfig = app.config().get('auth').admin
     // check if admin user already exists
     let user = (await userRepo.find({ email: userConfig.email }))[ 0 ]
     // if exists and permissions > 0 then update
     if (user) {
-      if (newEndpoints.length > 0) {
-        // check if the old permissions were ids or objects
-        // if ids then convert them to objects
-        const allPermissions = []
-        for (let permission of user.data.permissions) {
-          if (typeof permission === 'string') {
-            let current = newEndpoints.find(p => p.getId() === permission)
-            allPermissions.push({
-              name: current.name,
-              data: {},
-            })
-          } else {
-            allPermissions.push(permission)
-          }
-        }
-        // push the new permissions to allPermissions and then replace in user
-        allPermissions.push(...newEndpoints.map(p => {
-          return { name: p.name, data: {} }
-        }))
-        user.set({ permissions: allPermissions })
-        userRepo.update([ user ])
-          .catch(err => {
-            console.log(err)
+      // if ids then convert them to objects
+      const allPermissions = []
+      for (let permission of user.data.permissions) {
+        if (typeof permission === 'string') {
+          let current = newEndpoints.find(p => p.getId() === permission)
+          allPermissions.push({
+            name: current.name,
+            data: {},
           })
+        } else {
+          allPermissions.push(permission)
+        }
       }
+      // push the new permissions to allPermissions and then replace in user
+      allPermissions.push(...newEndpoints.map(p => {
+        return { name: p.name, data: {} }
+      }))
+      user.set({ permissions: allPermissions })
+      userRepo.update([ user ])
+        .catch(err => {
+          console.log(err)
+        })
     } else {
       // if user doesn't exist create it and give it all the permissions
       let userData = {

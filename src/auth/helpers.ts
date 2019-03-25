@@ -1,8 +1,7 @@
 import App, { IStringKeyedObject } from '@lattice/core'
 
 export const graphQlDefaultAuth = (next: any) => (rp: any) => {
-  // get the endpoint
-  const endpoint = 'something'
+  const endpoint = rp.info.fieldName
   // check if user permissions has endpoint
   if (rp.context.user && rp.context.user.permissions.find((p: any) => p.name === endpoint) != undefined) {
     return next(rp)
@@ -12,9 +11,12 @@ export const graphQlDefaultAuth = (next: any) => (rp: any) => {
   }
 }
 
-export const restDefaultAuth = (req: any, res: any, next: any) => {
-  const endpoint = req.url
-  if (req.user && req.user.permissions.find((p: any) => p.name === endpoint) != undefined) {
+export const graphQlDefaultUnprotectedAuth = (next: any) => (rp: any) => {
+  return next(rp)
+}
+
+export const restDefaultAuth = (route: string) => (req: any, res: any, next: any) => {
+  if (req.user && req.user.permissions.find((p: any) => p.name === route) != undefined) {
     next()
   }
   else {
@@ -22,16 +24,19 @@ export const restDefaultAuth = (req: any, res: any, next: any) => {
   }
 }
 
+export const restDefaultUnprotectedAuth = (route: string) => (req: any, res: any, next: any) => {
+  next()
+}
 
 export const getEndpointAuthConfig = (app: App, endpoint: string, httpMethod: string) => {
   const authPlugin: any = app.getPlugin('cyber-crafts.cms-plugin-auth')
   const authConfigs = authPlugin.authConfig
-  const g = endpoint.match(/\/graphql.*/g)
-  if (g === null) {
-    const endpointAuthConfig = authConfigs.rest.find((config: IStringKeyedObject)=> {
-      return config.endpoint === endpoint
+  const graphqlMatch = endpoint.match(/\/graphql.*/g)
+  if (graphqlMatch === null) {
+    const endpointAuthConfig = authConfigs.rest.find((config: IStringKeyedObject) => {
+      return (config.endpoint === endpoint) && (config.method === httpMethod)
     })
-    return endpointAuthConfig === undefined? null: endpointAuthConfig
+    return endpointAuthConfig === undefined ? null : endpointAuthConfig
   }
   return true
 }

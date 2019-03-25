@@ -22,14 +22,12 @@ export default class implements contracts.IPlugin {
 
   name: string = 'cyber-crafts.cms-plugin-auth'
   private resolvers: object
-  private unprotectedEndpoints: string[]
-  private customPermissions: IStringKeyedObject[]
+  private customData: IStringKeyedObject
   public authConfig: IStringKeyedObject = {}
   public availablePermissions: IStringKeyedObject[]
 
-  constructor (unprotectedEndpoints: string[] = [], customPermissions: IStringKeyedObject[]) {
-    this.unprotectedEndpoints = unprotectedEndpoints
-    this.customPermissions = customPermissions
+  constructor (customData: IStringKeyedObject) {
+    this.customData = customData
   }
 
   /*
@@ -55,7 +53,7 @@ export default class implements contracts.IPlugin {
     resolvers(container)
 
     container.emitter.on(coreNames.EV_PLUGINS_LOADED, async (items: any) => {
-      initPermissions(container, this.unprotectedEndpoints, this.customPermissions)
+      initPermissions(container, this.customData)
         .then(() => console.log('init permissions done'))
         .catch(err => {
           throw new Error(err)
@@ -82,11 +80,7 @@ export default class implements contracts.IPlugin {
       return { name: config.endpoint, description: '' }
     }))
     if (customPermissions) {
-      this.availablePermissions.push(...customPermissions.map((config: any) => {
-        return { name: config.endpoint, description: config.description }
-      }))
+      this.availablePermissions.push(...customPermissions)
     }
   }
 }
-
-// TODO: auth needs general testing
