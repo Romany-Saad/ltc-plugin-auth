@@ -1,2 +1,3 @@
-import App, { IStringKeyedObject } from '@lattice/core';
-export declare const initPermissions: (app: App, customData: IStringKeyedObject) => Promise<void>;
+import App from '@lattice/core';
+import ICustomAuthData from '../contracts/ICustomAuthData';
+export declare const initPermissions: (app: App, customData: ICustomAuthData) => Promise<void>;

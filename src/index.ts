@@ -10,6 +10,10 @@ import { Users } from './modules/User'
 import { PasswordResets } from './modules/PasswordReset'
 import { initPermissions } from './auth/init-permissions'
 import userListener from './modules/User/listener'
+import ICustomAuthData from './contracts/ICustomAuthData'
+import IPermission from './contracts/IPermission'
+import IRestAuthConfig from './contracts/IRestAuthConfig'
+import IGraphqlAuthConfig from './contracts/IGraphqlAuthConfig'
 
 export const names = {
   AUTH_PERMISSIONS_REPOSITORY: Symbol(namer.resolve('auth', 'permissions', 'repository')),
@@ -22,11 +26,11 @@ export default class implements contracts.IPlugin {
 
   name: string = 'cyber-crafts.cms-plugin-auth'
   private resolvers: object
-  private customData: IStringKeyedObject
+  private customData: ICustomAuthData
   public authConfig: IStringKeyedObject = {}
   public availablePermissions: IStringKeyedObject[]
 
-  constructor (customData: IStringKeyedObject) {
+  constructor (customData: ICustomAuthData) {
     this.customData = customData
   }
 
@@ -63,15 +67,15 @@ export default class implements contracts.IPlugin {
     userListener(container)
   }
 
-  setGraphQlAuthConfig (config: IStringKeyedObject[]) {
-    this.authConfig.graphQl = config
+  setGraphQlAuthConfig (configs: IGraphqlAuthConfig[]) {
+    this.authConfig.graphQl = configs
   }
 
-  setRestAuthConfig (config: IStringKeyedObject[]) {
-    this.authConfig.rest = config
+  setRestAuthConfig (configs: IRestAuthConfig[]) {
+    this.authConfig.rest = configs
   }
 
-  setAvailablePermissions (customPermissions: IStringKeyedObject[] = null) {
+  setAvailablePermissions (customPermissions: IPermission[] = null) {
     this.availablePermissions = []
     this.availablePermissions.push(...this.authConfig.rest.map((config: any) => {
       return { name: config.endpoint, description: '' }

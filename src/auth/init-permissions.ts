@@ -1,8 +1,10 @@
 import App, { IStringKeyedObject } from '@lattice/core'
 import { schemaComposer } from 'graphql-compose'
-import { restDefaultAuth } from './helpers'
+import { restDefaultAuth, graphQlDefaultAuth } from './helpers'
+import IGraphqlAuthConfig from '../contracts/IGraphqlAuthConfig'
+import ICustomAuthData from '../contracts/ICustomAuthData'
 
-export const initPermissions = async (app: App, customData: IStringKeyedObject) => {
+export const initPermissions = async (app: App, customData: ICustomAuthData) => {
   const authConfigs = loadAuthConfigs(app)
   const authPlugin: any = app.getPlugin('cyber-crafts.cms-plugin-auth')
   authPlugin.setGraphQlAuthConfig([...authConfigs.graphql, ...customData.authConfigs.graphql])
@@ -29,16 +31,16 @@ function getGraphQlAuthConfigs () {
   let mutationEndpoints: any = schemaComposer.rootMutation().getFields()
   const queryAuthConfigs = generateGraphqlEndpointsConfig(queryEndpoints, 'query')
   const mutationAuthConfigs = generateGraphqlEndpointsConfig(mutationEndpoints, 'mutation')
-  const graphqlAuthConfigs = [ ...queryAuthConfigs, ...mutationAuthConfigs ]
-  return graphqlAuthConfigs
+  return [ ...queryAuthConfigs, ...mutationAuthConfigs ]
 }
 
 function generateGraphqlEndpointsConfig (endpoints: string[], endpointsType: string) {
   const configs = []
   for (let endpoint in endpoints) {
-    let data: any = {
+    let data: IGraphqlAuthConfig = {
       endpoint: endpoint,
       type: endpointsType,
+      authorize: graphQlDefaultAuth
     }
     configs.push(data)
   }
