@@ -78,7 +78,7 @@ export default class implements contracts.IPlugin {
   setAvailablePermissions (customPermissions: IPermission[] = null) {
     this.availablePermissions = []
     this.availablePermissions.push(...this.authConfig.rest.map((config: any) => {
-      return { name: config.endpoint, description: '' }
+      return { name: config.path, description: '' }
     }))
     this.availablePermissions.push(...this.authConfig.graphQl.map((config: any) => {
       return { name: config.endpoint, description: '' }
