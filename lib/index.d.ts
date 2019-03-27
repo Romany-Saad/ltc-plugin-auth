@@ -14,7 +14,7 @@ export default class implements contracts.IPlugin {
     private resolvers;
     private customData;
     authConfig: IStringKeyedObject;
-    availablePermissions: IStringKeyedObject[];
+    availablePermissions: IPermission[];
     constructor(customData: ICustomAuthData);
     load(container: App): Promise<void>;
     setGraphQlAuthConfig(configs: IGraphqlAuthConfig[]): void;

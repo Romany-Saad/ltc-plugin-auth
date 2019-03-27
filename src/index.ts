@@ -28,7 +28,7 @@ export default class implements contracts.IPlugin {
   private resolvers: object
   private customData: ICustomAuthData
   public authConfig: IStringKeyedObject = {}
-  public availablePermissions: IStringKeyedObject[]
+  public availablePermissions: IPermission[]
 
   constructor (customData: ICustomAuthData) {
     this.customData = customData

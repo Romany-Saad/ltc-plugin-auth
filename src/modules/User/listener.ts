@@ -2,33 +2,33 @@ import { names as mailNames } from 'ltc-plugin-mail'
 import App from '@lattice/core/lib/App'
 import AMongoDbRepository from 'ltc-plugin-mongo/lib/abstractions/AMongoDbRepository'
 import { names } from '../../index'
+import bcrypt = require('bcrypt')
+import IPermission from '../../contracts/IPermission'
+import { assertValidExecutionArguments } from 'graphql/execution/execute'
+
 
 export default (app: App) => {
   app.emitter.on('PERMISSIONS_INIT_DONE', async (data) => {
+    // adds admin user if it doesn't exist and gives it the proper permissions
+    const authPlugin: any = app.getPlugin('cyber-crafts.cms-plugin-auth')
+    const availablePermissions: IPermission[] = authPlugin.availablePermissions
+
     const userRepo = app.get<AMongoDbRepository<any>>(names.AUTH_USERS_REPOSITORY)
-    /*let userConfig = app.config().get('auth').admin
+    let userConfig = app.config().get('auth').admin
     // check if admin user already exists
     let user = (await userRepo.find({ email: userConfig.email }))[ 0 ]
     // if exists and permissions > 0 then update
     if (user) {
-      // if ids then convert them to objects
-      const allPermissions = []
+      const allUserPermissions = []
       for (let permission of user.data.permissions) {
-        if (typeof permission === 'string') {
-          let current = newEndpoints.find(p => p.getId() === permission)
-          allPermissions.push({
-            name: current.name,
-            data: {},
-          })
-        } else {
-          allPermissions.push(permission)
-        }
+        allUserPermissions.push(permission)
       }
-      // push the new permissions to allPermissions and then replace in user
-      allPermissions.push(...newEndpoints.map(p => {
+      // push the new permissions to allUserPermissions and then replace in user
+      const newPermissions = getPermissionsDiff(availablePermissions, allUserPermissions)
+      allUserPermissions.push(...newPermissions.map(p => {
         return { name: p.name, data: {} }
       }))
-      user.set({ permissions: allPermissions })
+      user.set({ permissions: allUserPermissions })
       userRepo.update([ user ])
         .catch(err => {
           console.log(err)
@@ -39,7 +39,7 @@ export default (app: App) => {
         email: userConfig.email,
         password: await bcrypt.hash(userConfig.password, 10),
         status: 'active',
-        permissions: newEndpoints.map(p => {
+        permissions: availablePermissions.map(p => {
           return { name: p.name, data: {} }
         }),
         name: userConfig.name,
@@ -52,7 +52,7 @@ export default (app: App) => {
             throw new Error(err)
           })
       } else {
-        console.log('something', validation)
+        console.log('error creating admin user', validation)
       }
       //  send the user data to the specified email
       let transporter: any = app.get(mailNames.MAIL_TRANSPORTER_SERVICE)
@@ -68,6 +68,12 @@ export default (app: App) => {
         .catch((err: any) => {
           console.log(err)
         })
-    }*/
+    }
+  })
+}
+
+function getPermissionsDiff (set1: Array<any>, set2: Array<any>) {
+  return set1.filter(set1Perm => {
+    return set2.find(set2Perm => set1Perm.name === set2Perm.name) === undefined
   })
 }
