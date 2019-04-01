@@ -58,7 +58,9 @@ export default class implements contracts.IPlugin {
 
     container.emitter.on(coreNames.EV_PLUGINS_LOADED, async (items: any) => {
       initPermissions(container, this.customData)
-        .then(() => console.log('init permissions done'))
+        .then(() => {
+          console.log('init permissions done')
+        })
         .catch(err => {
           throw new Error(err)
         })

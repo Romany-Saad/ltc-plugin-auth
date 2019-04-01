@@ -1,14 +1,14 @@
 import App, { IStringKeyedObject } from '@lattice/core'
 import { schemaComposer } from 'graphql-compose'
-import { restDefaultAuth, graphQlDefaultAuth } from './helpers'
+import { graphQlDefaultAuth, restDefaultAuth } from './helpers'
 import IGraphqlAuthConfig from '../contracts/IGraphqlAuthConfig'
 import ICustomAuthData from '../contracts/ICustomAuthData'
 
 export const initPermissions = async (app: App, customData: ICustomAuthData) => {
   const authConfigs = loadAuthConfigs(app)
   const authPlugin: any = app.getPlugin('cyber-crafts.cms-plugin-auth')
-  authPlugin.setGraphQlAuthConfig([...authConfigs.graphql, ...customData.authConfigs.graphql])
-  authPlugin.setRestAuthConfig([...authConfigs.rest, ...customData.authConfigs.rest])
+  authPlugin.setGraphQlAuthConfig(resolveGraphQlConflicts(authConfigs.graphql, customData.authConfigs.graphql))
+  authPlugin.setRestAuthConfig(resolveRestConflicts(authConfigs.rest, customData.authConfigs.rest))
   authPlugin.setAvailablePermissions(customData.permissions)
   app.emitter.emit('PERMISSIONS_INIT_DONE', authPlugin.availablePermissions)
 }
@@ -40,7 +40,7 @@ function generateGraphqlEndpointsConfig (endpoints: string[], endpointsType: str
     let data: IGraphqlAuthConfig = {
       endpoint: endpoint,
       type: endpointsType,
-      authorize: graphQlDefaultAuth
+      authorize: graphQlDefaultAuth,
     }
     configs.push(data)
   }
@@ -56,4 +56,30 @@ function getAvailableRoutes (app: App) {
         path: r.route.path,
       }
     })
+}
+
+function resolveGraphQlConflicts (defaultData: any[], customData: any[]) {
+  defaultData = defaultData.map((config) => {
+    const currentCustom = customData.find(customConfig => {
+      return customConfig.endpoint === config.endpoint
+    })
+    if (currentCustom != undefined) {
+      config.authorize = currentCustom.authorize
+    }
+    return config
+  })
+  return defaultData
+}
+
+function resolveRestConflicts (defaultData: any[], customData: any[]) {
+  defaultData = defaultData.map((config) => {
+    const currentCustom = customData.find(customConfig => {
+      return (customConfig.path === config.path) && (customConfig.method === config.method)
+    })
+    if (currentCustom != undefined) {
+      config.authorize = currentCustom.authorize
+    }
+    return config
+  })
+  return defaultData
 }
