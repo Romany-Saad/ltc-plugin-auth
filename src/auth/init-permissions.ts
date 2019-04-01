@@ -9,8 +9,6 @@ export const initPermissions = async (app: App, customData: ICustomAuthData) => 
   const authPlugin: any = app.getPlugin('cyber-crafts.cms-plugin-auth')
   authPlugin.setGraphQlAuthConfig(resolveGraphQlConflicts(authConfigs.graphql, customData.authConfigs.graphql))
   authPlugin.setRestAuthConfig(resolveRestConflicts(authConfigs.rest, customData.authConfigs.rest))
-  authPlugin.setAvailablePermissions(customData.permissions)
-  app.emitter.emit('PERMISSIONS_INIT_DONE', authPlugin.availablePermissions)
 }
 
 function loadAuthConfigs (app: App) {

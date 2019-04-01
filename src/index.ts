@@ -60,6 +60,8 @@ export default class implements contracts.IPlugin {
       initPermissions(container, this.customData)
         .then(() => {
           console.log('init permissions done')
+          this.setAvailablePermissions(this.customData.permissions)
+          container.emitter.emit('PERMISSIONS_INIT_DONE')
         })
         .catch(err => {
           throw new Error(err)
