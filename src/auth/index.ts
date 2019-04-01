@@ -25,17 +25,14 @@ export default class Auth {
     const permissionRepo = this.app.get<AMongoDbRepository<any>>(names.AUTH_PERMISSIONS_REPOSITORY)
     const userRepo = this.app.get<AMongoDbRepository<any>>(names.AUTH_USERS_REPOSITORY)
     let user = (await userRepo.findByIds([ this.authorizationData.userId ]))[ 0 ]
-    let permissions = user.data.permissions.map((p: any) => p.name)
-    let permissionsNames
-    if (permissions.length > 0) {
-      permissions = await permissionRepo.find({ name: { $in: permissions } })
-      permissionsNames = permissions.length > 0 ? permissions.map((p: any) => {
-        return { name: p.data.name, data: {} }
-      }) : []
-    } else {
-      permissionsNames = []
-    }
-    this.authorizationData.permissions = permissionsNames
+    let permissions = user.data.permissions.map((p: any) => {
+      return {
+        name: p.name,
+        description: '',
+      }
+    })
+    this.authorizationData.permissions = permissions
+    return this.authorizationData.permissions
     return this.authorizationData.permissions
   }
 }
