@@ -13,7 +13,7 @@ export default class extends BaseModel {
     permissions: c2v.arr.allItems(
       c2v.obj.requires('name', 'data')
         .keys({
-          name: c2v.str.attach(mongoExists(names.AUTH_PERMISSIONS_REPOSITORY, 'permissions', 'name')),
+          name: c2v.str,
           data: c2v.obj
         })
     ),

@@ -9,16 +9,42 @@ const Plugin = require('../../lib/index').default
 
 // creating a new app instance
 const app = new App()
-const unprotectedEndpoints = [
-  'login',
-  'register',
-  'getVideos',
-  'getModels',
-  'getCompanies',
-  'getOwnProfile'
-]
 
-const customPermissions = [
+const customData = {
+  permissions: [
+    {
+      name: 'postFile',
+      description: '',
+    },
+    {
+      name: 'blog.editor.update',
+      description: '',
+    },
+    {
+      name: 'findOwnFiles',
+      description: '',
+    },
+    {
+      name: 'deleteOwnVehicles',
+      description: '',
+    },
+    {
+      name: 'admin.addProfile',
+      description: '',
+    },
+    {
+      name: 'admin.updateProfile',
+      description: '',
+    },
+  ],
+  authConfigs: {
+    graphql: [],
+    rest: [],
+  }
+}
+/*
+
+[
   {
     name: 'postFile',
     endpoint: 'media',
@@ -56,8 +82,10 @@ const customPermissions = [
     type: 'mutation',
   },
 ]
+*/
+
 // initialize plugins here
-const plugin = new Plugin(unprotectedEndpoints, customPermissions)
+const plugin = new Plugin(customData)
 
 // adding plugins to app instance
 app.addPlugin(new ConfigPlugin(path.resolve(__dirname, '../config')))
@@ -71,3 +99,4 @@ async function registerPluginsAndInitApp() {
 }
 
 module.exports = registerPluginsAndInitApp
+// module.exports = app

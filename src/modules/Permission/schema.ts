@@ -2,7 +2,6 @@ import { InputTypeComposer, TypeComposer } from 'graphql-compose'
 
 export const PermissionTC = TypeComposer.create(`
 type Permission {
-    id: ID!
     name: String!
     endpoint: String!
     protected: Boolean!

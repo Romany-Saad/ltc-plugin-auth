@@ -9,9 +9,15 @@ import { Permissions } from './modules/Permission'
 import { Users } from './modules/User'
 import { PasswordResets } from './modules/PasswordReset'
 import { initPermissions } from './auth/init-permissions'
+import userListener from './modules/User/listener'
+import ICustomAuthData from './contracts/ICustomAuthData'
+import IPermission from './contracts/IPermission'
+import IRestAuthConfig from './contracts/IRestAuthConfig'
+import IGraphqlAuthConfig from './contracts/IGraphqlAuthConfig'
 
 export const names = {
   AUTH_PERMISSIONS_REPOSITORY: Symbol(namer.resolve('auth', 'permissions', 'repository')),
+  AUTH_PERMISSIONS_GRAPHQL_CONFIG: Symbol(namer.resolve('auth', 'permissions', 'config')),
   AUTH_USERS_REPOSITORY: Symbol(namer.resolve('auth', 'users', 'repository')),
   AUTH_PASSWORD_RESET_REPOSITORY: Symbol(namer.resolve('auth', 'passwordResets', 'repository')),
 }
@@ -20,13 +26,12 @@ export default class implements contracts.IPlugin {
 
   name: string = 'cyber-crafts.cms-plugin-auth'
   private resolvers: object
-  private unprotectedEndpoints: string[]
-  private customPermissions: IStringKeyedObject[]
+  private customData: ICustomAuthData
+  public authConfig: IStringKeyedObject = {}
+  public availablePermissions: IPermission[]
 
-
-  constructor (unprotectedEndpoints: string[] = [], customPermissions: IStringKeyedObject[]) {
-    this.unprotectedEndpoints = unprotectedEndpoints
-    this.customPermissions = customPermissions
+  constructor (customData: ICustomAuthData) {
+    this.customData = customData
   }
 
   /*
@@ -52,12 +57,38 @@ export default class implements contracts.IPlugin {
     resolvers(container)
 
     container.emitter.on(coreNames.EV_PLUGINS_LOADED, async (items: any) => {
-      initPermissions(container, this.unprotectedEndpoints, this.customPermissions)
+      initPermissions(container, this.customData)
+        .then(() => {
+          console.log('init permissions done')
+          this.setAvailablePermissions(this.customData.permissions)
+          container.emitter.emit('PERMISSIONS_INIT_DONE')
+        })
         .catch(err => {
           throw new Error(err)
         })
     })
 
+    userListener(container)
   }
 
+  setGraphQlAuthConfig (configs: IGraphqlAuthConfig[]) {
+    this.authConfig.graphQl = configs
+  }
+
+  setRestAuthConfig (configs: IRestAuthConfig[]) {
+    this.authConfig.rest = configs
+  }
+
+  setAvailablePermissions (customPermissions: IPermission[] = null) {
+    this.availablePermissions = []
+    this.availablePermissions.push(...this.authConfig.rest.map((config: any) => {
+      return { name: config.path, description: '' }
+    }))
+    this.availablePermissions.push(...this.authConfig.graphQl.map((config: any) => {
+      return { name: config.endpoint, description: '' }
+    }))
+    if (customPermissions) {
+      this.availablePermissions.push(...customPermissions)
+    }
+  }
 }

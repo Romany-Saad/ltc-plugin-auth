@@ -18,11 +18,6 @@
     "lib:generate",
     "test:staged"
   ],
-  "dependencies": {
-    "bcrypt": "^3.0.4",
-    "jwt-simple": "^0.5.1",
-    "randexp": "^0.5.3"
-  },
   "peerDependencies": {
     "@lattice/core": "*",
     "ltc-plugin-config": "*",
@@ -35,13 +30,19 @@
     "ltc-plugin-config": "git+ssh://git@bitbucket.org/cyber-crafts/ltc-plugin-config.git",
     "ltc-plugin-graphql": "git+ssh://git@bitbucket.org/cyber-crafts/ltc-plugin-graphql.git",
     "ltc-plugin-mail": "git+ssh://git@bitbucket.org/cyber-crafts/ltc-plugin-mail.git",
-    "ltc-plugin-mongo": "git+ssh://git@bitbucket.org/cyber-crafts/ltc-plugin-mongo.git",
+    "ltc-plugin-mongo": "git+ssh://git@bitbucket.org/cyber-crafts/ltc-plugin-mongo.git"
+  },
+  "dependencies": {
+    "@types/bcrypt": "^2.0.0",
+    "@types/jest": "^22.2.3",
+    "@types/jwt-simple": "^0.5.33",
+    "@types/node": "^9.6.47",
+    "bcrypt": "^3.0.5",
+    "express-list-endpoints": "^4.0.0",
     "faker": "^4.1.0",
     "jest": "^22.4.3",
+    "jwt-simple": "^0.5.1",
     "pre-commit": "^1.2.2",
-    "@types/bcrypt": "^2.0.0",
-    "@types/jwt-simple": "^0.5.33",
-    "@types/jest": "^22.2.3",
-    "@types/node": "^9.6.42"
+    "randexp": "^0.5.3"
   }
 }
