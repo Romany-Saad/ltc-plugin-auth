@@ -8,6 +8,7 @@ import { IStringKeyedObject } from '@lattice/core/lib/contracts'
 import { names as mailNames } from 'ltc-plugin-mail'
 import { Permissions } from '../Permission'
 import { UserTC } from './schema'
+import AMongoDbRepository from 'ltc-plugin-mongo/lib/abstractions/AMongoDbRepository'
 import bcrypt = require('bcrypt')
 import jwt = require('jwt-simple')
 
@@ -129,8 +130,12 @@ export default (container: App): void => {
     name: 'checkToken',
     type: 'Boolean!',
     args: { token: 'String!' },
-    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+    resolve: async ({ source, args, context, info }: ResolveParams<App, any>): Promise<any> => {
       let token = jwt.decode(args.token, container.config().get('auth').secret)
+      const user = await repository.findByIds([ token.userId ])
+      if (user.length === 0) {
+        return false
+      }
       return !!token
     },
   })
@@ -151,7 +156,9 @@ export default (container: App): void => {
       if (permissions.length > 0) {
         permissions = await permissionRepo.find({ name: { $in: permissions } })
         data.permissions = permissions.length > 0 ? permissions
-          .map((p: any) => {return {name: p.data.name, data: {}}}) : []
+          .map((p: any) => {
+            return { name: p.data.name, data: {} }
+          }) : []
       } else {
         data.permissions = []
       }
@@ -175,8 +182,7 @@ export default (container: App): void => {
         }
         try {
           await transporter.sendMail(mailOptions)
-        }
-        catch (e) {
+        } catch (e) {
           console.log(e)
         }
         return transform(newUser)
@@ -331,7 +337,9 @@ export default (container: App): void => {
       if (permissions.length > 0) {
         permissions = await permissionRepo.find({ name: { $in: permissions } })
         data.permissions = permissions.length > 0 ? permissions
-          .map((p: any) => {return {name: p.data.name, data: {}}}) : []
+          .map((p: any) => {
+            return { name: p.data.name, data: {} }
+          }) : []
         // permissionNames = permissions.length > 0 ? permissions.map((p: any) => p.data.name) : []
       } else {
         data.permissions = []
@@ -366,8 +374,7 @@ export default (container: App): void => {
         }
         try {
           await transporter.sendMail(mailOptions)
-        }
-        catch (e) {
+        } catch (e) {
           console.log(e)
         }
         return authedUser
