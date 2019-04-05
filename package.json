@@ -43,6 +43,7 @@
     "jest": "^22.4.3",
     "jwt-simple": "^0.5.1",
     "pre-commit": "^1.2.2",
-    "randexp": "^0.5.3"
+    "randexp": "^0.5.3",
+    "url-pattern": "^1.0.3"
   }
 }

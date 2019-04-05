@@ -1,12 +1,13 @@
 import App, { IStringKeyedObject } from '@lattice/core'
 
+const UrlPattern = require('url-pattern')
+
 export const graphQlDefaultAuth = (next: any) => (rp: any) => {
   const endpoint = rp.info.fieldName
   // check if user permissions has endpoint
   if (rp.context.user && rp.context.user.permissions.find((p: any) => p.name === endpoint) != undefined) {
     return next(rp)
-  }
-  else {
+  } else {
     throw new Error('permissions denied')
   }
 }
@@ -18,8 +19,7 @@ export const graphQlDefaultUnprotectedAuth = (next: any) => (rp: any) => {
 export const restDefaultAuth = (route: string) => (req: any, res: any, next: any) => {
   if (req.user && req.user.permissions.find((p: any) => p.name === route) != undefined) {
     next()
-  }
-  else {
+  } else {
     throw new Error('permissions denied')
   }
 }
@@ -34,7 +34,8 @@ export const getEndpointAuthConfig = (app: App, endpoint: string, httpMethod: st
   const graphqlMatch = endpoint.match(/\/graphql.*/g)
   if (graphqlMatch === null) {
     const endpointAuthConfig = authConfigs.rest.find((config: IStringKeyedObject) => {
-      return (config.endpoint === endpoint) && (config.method === httpMethod)
+      const pattern = new UrlPattern(config.path)
+      return pattern.match(endpoint) && (config.method === httpMethod)
     })
     return endpointAuthConfig === undefined ? null : endpointAuthConfig
   }
