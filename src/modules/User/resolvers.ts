@@ -132,8 +132,11 @@ export default (container: App): void => {
     args: { token: 'String!' },
     resolve: async ({ source, args, context, info }: ResolveParams<App, any>): Promise<any> => {
       let token = jwt.decode(args.token, container.config().get('auth').secret)
-      const user = await repository.findByIds([ token.userId ])
+      const user: any[] = await repository.findByIds([ token.userId ])
       if (user.length === 0) {
+        return false
+      }
+      if (user[0].data.status != 'active') {
         return false
       }
       return !!token
