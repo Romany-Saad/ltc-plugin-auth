@@ -5,7 +5,7 @@ import Connection from 'ltc-plugin-mongo/lib/Connection'
 import { namer } from '@lattice/core/lib/utils'
 import { names as mongoNames } from 'ltc-plugin-mongo'
 import { Context } from 'c2v'
-import { Permissions } from './modules/Permission'
+// import { Permissions } from './modules/Permission'
 import { Users } from './modules/User'
 import { PasswordResets } from './modules/PasswordReset'
 import { initPermissions } from './auth/init-permissions'
@@ -16,7 +16,7 @@ import IRestAuthConfig from './contracts/IRestAuthConfig'
 import IGraphqlAuthConfig from './contracts/IGraphqlAuthConfig'
 
 export const names = {
-  AUTH_PERMISSIONS_REPOSITORY: Symbol(namer.resolve('auth', 'permissions', 'repository')),
+  // AUTH_PERMISSIONS_REPOSITORY: Symbol(namer.resolve('auth', 'permissions', 'repository')),
   AUTH_PERMISSIONS_GRAPHQL_CONFIG: Symbol(namer.resolve('auth', 'permissions', 'config')),
   AUTH_USERS_REPOSITORY: Symbol(namer.resolve('auth', 'users', 'repository')),
   AUTH_PASSWORD_RESET_REPOSITORY: Symbol(namer.resolve('auth', 'passwordResets', 'repository')),
@@ -42,9 +42,9 @@ export default class implements contracts.IPlugin {
     const config: IConfiguration = container.config()
     const connection: Connection = container.get(mongoNames.MONGO_SERVICES_CONNECTION)
 
-    const permissions = new Permissions(connection.getClient(), `permissions`)
-    container.bind<Permissions>(names.AUTH_PERMISSIONS_REPOSITORY).toConstantValue(permissions)
-    Context.bind(names.AUTH_PERMISSIONS_REPOSITORY, permissions)
+    // const permissions = new Permissions(connection.getClient(), `permissions`)
+    // container.bind<Permissions>(names.AUTH_PERMISSIONS_REPOSITORY).toConstantValue(permissions)
+    // Context.bind(names.AUTH_PERMISSIONS_REPOSITORY, permissions)
 
     const users = new Users(connection.getClient(), `users`)
     container.bind<Users>(names.AUTH_USERS_REPOSITORY).toConstantValue(users)

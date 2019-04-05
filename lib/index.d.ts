@@ -4,7 +4,6 @@ import IPermission from './contracts/IPermission';
 import IRestAuthConfig from './contracts/IRestAuthConfig';
 import IGraphqlAuthConfig from './contracts/IGraphqlAuthConfig';
 export declare const names: {
-    AUTH_PERMISSIONS_REPOSITORY: symbol;
     AUTH_PERMISSIONS_GRAPHQL_CONFIG: symbol;
     AUTH_USERS_REPOSITORY: symbol;
     AUTH_PASSWORD_RESET_REPOSITORY: symbol;

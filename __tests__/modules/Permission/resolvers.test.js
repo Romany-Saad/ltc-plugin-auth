@@ -6,14 +6,11 @@ const names = require('../../../lib/index').names
 const {schemaComposer} = require('graphql-compose')
 const seeder = require('./seeder')
 
-let app, schema, repository, instance
+let app, schema
 
 beforeAll(async () => {
   app = await registerPluginsAndInitApp()
   schema = schemaComposer.buildSchema()
-  repository = app.get(names.AUTH_PERMISSIONS_REPOSITORY)
-  instance = (await seeder(app, 1))[0]
-
 })
 
 describe('given schema is the GraphQlSchema object loaded with schemas from Permission plugin', () => {

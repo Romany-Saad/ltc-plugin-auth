@@ -6,9 +6,7 @@ import './schema'
 import { ResolveParams, schemaComposer } from 'graphql-compose'
 import { IStringKeyedObject } from '@lattice/core/lib/contracts'
 import { names as mailNames } from 'ltc-plugin-mail'
-import { Permissions } from '../Permission'
 import { UserTC } from './schema'
-import AMongoDbRepository from 'ltc-plugin-mongo/lib/abstractions/AMongoDbRepository'
 import bcrypt = require('bcrypt')
 import jwt = require('jwt-simple')
 
@@ -53,8 +51,8 @@ export default (container: App): void => {
   const repository = container
     .get<Users>(names.AUTH_USERS_REPOSITORY)
 
-  const permissionRepo = container
-    .get<Permissions>(names.AUTH_PERMISSIONS_REPOSITORY)
+  // const permissionRepo = container
+  //   .get<Permissions>(names.AUTH_PERMISSIONS_REPOSITORY)
 
   const resetRepo = container
     .get<Users>(names.AUTH_PASSWORD_RESET_REPOSITORY)
@@ -136,7 +134,7 @@ export default (container: App): void => {
       if (user.length === 0) {
         return false
       }
-      if (user[0].data.status != 'active') {
+      if (user[ 0 ].data.status != 'active') {
         return false
       }
       return !!token
@@ -155,16 +153,11 @@ export default (container: App): void => {
     args: { input: 'NewUser!' },
     resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
       const data = await dataToModel(args.input)
-      let permissions = container.config().get('auth').user.defaultPermissions || []
-      if (permissions.length > 0) {
-        permissions = await permissionRepo.find({ name: { $in: permissions } })
-        data.permissions = permissions.length > 0 ? permissions
-          .map((p: any) => {
-            return { name: p.data.name, data: {} }
-          }) : []
-      } else {
-        data.permissions = []
-      }
+      let defaultPermissions = container.config().get('auth').user.defaultPermissions || []
+      data.defaultPermissions = defaultPermissions.length > 0 ? defaultPermissions
+        .map((p: any) => {
+          return { name: p.data.name, data: {} }
+        }) : []
       data.status = 'active'
       let newUser = repository.parse(data)
       let validation = await newUser.selfValidate()
@@ -335,18 +328,11 @@ export default (container: App): void => {
     args: { input: 'NewUser!' },
     resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
       const data = await dataToModel(args.input)
-      let permissions = container.config().get('auth').user.defaultPermissions || []
-      // let permissionNames
-      if (permissions.length > 0) {
-        permissions = await permissionRepo.find({ name: { $in: permissions } })
-        data.permissions = permissions.length > 0 ? permissions
-          .map((p: any) => {
-            return { name: p.data.name, data: {} }
-          }) : []
-        // permissionNames = permissions.length > 0 ? permissions.map((p: any) => p.data.name) : []
-      } else {
-        data.permissions = []
-      }
+      let defaultPermissions = container.config().get('auth').user.defaultPermissions || []
+      data.defaultPermissions = defaultPermissions.length > 0 ? defaultPermissions
+        .map((p: any) => {
+          return { name: p.data.name, data: {} }
+        }) : []
       data.status = 'active'
       let newUser: any = repository.parse(data)
       let validation = await newUser.selfValidate()
