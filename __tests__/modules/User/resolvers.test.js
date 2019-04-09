@@ -39,7 +39,6 @@ describe('given schema is the GraphQlSchema object loaded with schemas from User
   it('should login a User if data is valid and returns AuthedUser', async () => {
     const q = `query login($email: String!, $password: String!) { login (email: $email, password: $password) { id , email, permissions{name}, token } }`
     const x = await graphql(schema, q, null, null, {email: instance.data.email, password: '123456sd'})
-    console.log(x)
     token = x.data.login.token
     expect(x).toHaveProperty('data.login.email')
     expect(x).toHaveProperty('data.login.id')
@@ -54,7 +53,6 @@ describe('given schema is the GraphQlSchema object loaded with schemas from User
   it('should verify token on checkToken', async () => {
     const q = `query checkToken($token: String!) { checkToken (token: $token)}`
     const x = await graphql(schema, q, null, null, {token})
-    console.log(x)
     expect(x.data.checkToken).toBe(true)
   })
 
