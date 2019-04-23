@@ -154,11 +154,7 @@ export default (container: App): void => {
     resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
       const data = await dataToModel(args.input)
       let authConfig = container.config().get('auth')
-      let defaultPermissions = container.config().get('auth').user.defaultPermissions || []
-      data.permissions = defaultPermissions.length > 0 ? defaultPermissions
-        .map((p: any) => {
-          return { name: p, data: {} }
-        }) : []
+      data.permissions = []
       data.status = 'active'
       let newUser = repository.parse(data)
       let validation = await newUser.selfValidate()
@@ -331,11 +327,7 @@ export default (container: App): void => {
     resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
       const authConfig = container.config().get('auth')
       const data = await dataToModel(args.input)
-      let defaultPermissions = container.config().get('auth').user.defaultPermissions || []
-      data.permissions = defaultPermissions.length > 0 ? defaultPermissions
-        .map((p: any) => {
-          return { name: p, data: {} }
-        }) : []
+      data.permissions = []
       data.status = 'active'
       let newUser: any = repository.parse(data)
       let validation = await newUser.selfValidate()

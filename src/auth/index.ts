@@ -34,8 +34,16 @@ export default class Auth {
         description: '',
       }
     })
+    const defaultPermissions = this.app.config().get('auth.defaultPermissions')
+    if (defaultPermissions) {
+      permissions.push(...defaultPermissions.map((p: string) => {
+        return {
+          name: p,
+          description: '',
+        }
+      }))
+    }
     this.authorizationData.permissions = permissions
-    return this.authorizationData.permissions
     return this.authorizationData.permissions
   }
 }
