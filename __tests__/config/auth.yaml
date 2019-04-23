@@ -7,3 +7,7 @@ user:
   defaultPermissions: [login]
 
 registerMessage: <h3>Welcome <<name>>, </h3><br> <p>Your registration is successful</p>
+adminCreationSubject: Hasan Kutbi - admin account data
+addUserSubject: Hasan Kutbi - Welcome to Arabian drive
+registerSubject: Hasan Kutbi - Welcome to Arabian drive
+resetPasswordSubject: Hasan Kutbi - Password reset request

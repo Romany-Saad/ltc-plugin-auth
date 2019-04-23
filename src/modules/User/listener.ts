@@ -14,9 +14,9 @@ export default (app: App) => {
     const availablePermissions: IPermission[] = authPlugin.availablePermissions
 
     const userRepo = app.get<AMongoDbRepository<any>>(names.AUTH_USERS_REPOSITORY)
-    let userConfig = app.config().get('auth').admin
+    let userConfig = app.config().get('auth')
     // check if admin user already exists
-    let user = (await userRepo.find({ email: userConfig.email }))[ 0 ]
+    let user = (await userRepo.find({ email: userConfig.admin.email }))[ 0 ]
     // if exists and permissions > 0 then update
     if (user) {
       const allUserPermissions = []
@@ -36,13 +36,13 @@ export default (app: App) => {
     } else {
       // if user doesn't exist create it and give it all the permissions
       let userData = {
-        email: userConfig.email,
-        password: await bcrypt.hash(userConfig.password, 10),
+        email: userConfig.admin.email,
+        password: await bcrypt.hash(userConfig.admin.password, 10),
         status: 'active',
         permissions: availablePermissions.map(p => {
           return { name: p.name, data: {} }
         }),
-        name: userConfig.name,
+        name: userConfig.admin.name,
       }
       let newUser = userRepo.parse(userData)
       let validation = await newUser.selfValidate()
@@ -58,11 +58,11 @@ export default (app: App) => {
       let transporter: any = app.get(mailNames.MAIL_TRANSPORTER_SERVICE)
       let mailOptions = {
         from: 'admin', // sender address
-        to: userConfig.email, // list of receivers
-        subject: 'Hassan Kutbi - admin account data', // Subject line
+        to: userConfig.admin.email, // list of receivers
+        subject: userConfig.adminCreationSubject, // Subject line
         html: `<h1>Your login data: </h1><br>` +
-          `<p>name: ${userConfig.name}</p>` +
-          `<p>password: ${userConfig.password}</p>`, // html body
+          `<p>name: ${userConfig.admin.name}</p>` +
+          `<p>password: ${userConfig.admin.password}</p>`, // html body
       }
       transporter.sendMail(mailOptions)
         .catch((err: any) => {

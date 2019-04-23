@@ -153,6 +153,7 @@ export default (container: App): void => {
     args: { input: 'NewUser!' },
     resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
       const data = await dataToModel(args.input)
+      let authConfig = container.config().get('auth')
       let defaultPermissions = container.config().get('auth').user.defaultPermissions || []
       data.permissions = defaultPermissions.length > 0 ? defaultPermissions
         .map((p: any) => {
@@ -173,7 +174,7 @@ export default (container: App): void => {
         let mailOptions = {
           from: 'admin', // sender address
           to: data.email, // list of receivers
-          subject: 'Hassan Kutbi - Welcome to Arabian drive', // Subject line
+          subject: authConfig.addUserSubject, // Subject line
           html: msg, // html body
         }
         try {
@@ -262,7 +263,8 @@ export default (container: App): void => {
     name: 'resetPassword',
     type: 'Boolean!',
     args: { email: 'String!' },
-    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+    resolve: async ({ source, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+      const authConfig = source.config().get('auth')
       const data = await resetDataToModel(container, args.email)
       let newPasswordReset: any = resetRepo.parse(data)
       let validation = await newPasswordReset.selfValidate()
@@ -272,7 +274,7 @@ export default (container: App): void => {
         let mailOptions = {
           from: 'admin', // sender address
           to: args.email, // list of receivers
-          subject: 'Hassan Kutbi - Password reset request', // Subject line
+          subject: authConfig.resetPasswordSubject, // Subject line
           // html: '<b>Hello world?</b>' // html body
           text: newPasswordReset.secretCode, // html body
         }
@@ -327,6 +329,7 @@ export default (container: App): void => {
     type: 'AuthedUser!',
     args: { input: 'NewUser!' },
     resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+      const authConfig = container.config().get('auth')
       const data = await dataToModel(args.input)
       let defaultPermissions = container.config().get('auth').user.defaultPermissions || []
       data.permissions = defaultPermissions.length > 0 ? defaultPermissions
@@ -358,7 +361,7 @@ export default (container: App): void => {
         let mailOptions = {
           from: 'admin', // sender address
           to: data.email, // list of receivers
-          subject: 'Hassan Kutbi - Welcome to Arabian drive', // Subject line
+          subject: authConfig.registerSubject, // Subject line
           html: msg, // html body
         }
         try {
