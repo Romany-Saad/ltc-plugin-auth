@@ -278,7 +278,9 @@ export default (container: App): void => {
             user: {
               name: user.get('name'),
               secretCode: newPasswordReset.get('secretCode'),
+              resetId: newPasswordReset.getId(),
             },
+            host: context.req.headers.host
           }), // html body
           // text: newPasswordReset.get('secretCode'), // html body
         }
