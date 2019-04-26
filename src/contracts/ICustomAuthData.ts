@@ -5,7 +5,7 @@ import IRestAuthConfig from './IRestAuthConfig'
 export default interface ICustomAuthData {
   permissions: IPermission[]
   authConfigs: {
-    graphql : IGraphqlAuthConfig[],
+    graphql: IGraphqlAuthConfig[],
     rest: IRestAuthConfig[]
   }
 }

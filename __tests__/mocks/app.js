@@ -40,7 +40,7 @@ const customData = {
   authConfigs: {
     graphql: [],
     rest: [],
-  }
+  },
 }
 /*
 

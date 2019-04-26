@@ -7,6 +7,7 @@ import { ResolveParams, schemaComposer } from 'graphql-compose'
 import { IStringKeyedObject } from '@lattice/core/lib/contracts'
 import { names as mailNames } from 'ltc-plugin-mail'
 import { UserTC } from './schema'
+import { render } from 'ltc-plugin-templating/lib/utils'
 import bcrypt = require('bcrypt')
 import jwt = require('jwt-simple')
 
@@ -36,10 +37,8 @@ const dataToModel = (data: any): any => {
   }
 
 }
-const resetDataToModel = async (app: App, email: string): Promise<any> => {
+const resetDataToModel = async (user: any): Promise<any> => {
   let pr: IStringKeyedObject = {}
-  let userRepo = app.get<Users>(names.AUTH_USERS_REPOSITORY)
-  let user = (await userRepo.find({ email: email }))[ 0 ]
   pr.userId = user.getId()
   pr.secretCode = new RandExp(/^.{64}$/).gen()
   pr.createdAt = new Date(Date.now())
@@ -153,7 +152,6 @@ export default (container: App): void => {
     args: { input: 'NewUser!' },
     resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
       const data = await dataToModel(args.input)
-      let authConfig = container.config().get('auth')
       data.permissions = []
       data.status = 'active'
       let newUser = repository.parse(data)
@@ -161,17 +159,16 @@ export default (container: App): void => {
       if (validation.success) {
         newUser = (await repository.insert([ newUser ]))[ 0 ]
         let transporter: any = container.get(mailNames.MAIL_TRANSPORTER_SERVICE)
-        let msg: string = container.config().get('auth.registerMessage')
-        if (msg) {
-          msg = msg.replace(/<<name>>/, data.name)
-        } else {
-          msg = `<h3>Welcome ${data.name}, </h3><br> <p>Your registration is successful</p>`
-        }
+        let emailConfig: any = container.config().get('auth.emails.addUser')
         let mailOptions = {
           from: 'admin', // sender address
           to: data.email, // list of receivers
-          subject: authConfig.addUserSubject, // Subject line
-          html: msg, // html body
+          subject: emailConfig.subject, // Subject line
+          html: render(emailConfig.templatePath, {
+            user: {
+              name: data.name,
+            },
+          }), // html body
         }
         try {
           await transporter.sendMail(mailOptions)
@@ -260,19 +257,30 @@ export default (container: App): void => {
     type: 'Boolean!',
     args: { email: 'String!' },
     resolve: async ({ source, args, context, info }: ResolveParams<App, any>): Promise<any> => {
-      const authConfig = source.config().get('auth')
-      const data = await resetDataToModel(container, args.email)
+      const authConfig = container.config().get('auth')
+      let userRepo = container.get<Users>(names.AUTH_USERS_REPOSITORY)
+      let user = (await userRepo.find({ email: args.email }))[ 0 ]
+      if (!user) {
+        throw new Error('Invalid email.')
+      }
+      const data = await resetDataToModel(user)
       let newPasswordReset: any = resetRepo.parse(data)
       let validation = await newPasswordReset.selfValidate()
       if (validation.success) {
         newPasswordReset = (await resetRepo.insert([ newPasswordReset ]))[ 0 ]
         let transporter: any = container.get(mailNames.MAIL_TRANSPORTER_SERVICE)
+        let emailConfig: any = container.config().get('auth.emails.resetPassword')
         let mailOptions = {
           from: 'admin', // sender address
           to: args.email, // list of receivers
-          subject: authConfig.resetPasswordSubject, // Subject line
-          // html: '<b>Hello world?</b>' // html body
-          text: newPasswordReset.secretCode, // html body
+          subject: emailConfig.subject, // Subject line
+          html: render(emailConfig.templatePath, {
+            user: {
+              name: user.get('name'),
+              secretCode: newPasswordReset.get('secretCode'),
+            },
+          }), // html body
+          // text: newPasswordReset.get('secretCode'), // html body
         }
         return transporter.sendMail(mailOptions)
           .then((info: any) => {
@@ -296,6 +304,9 @@ export default (container: App): void => {
     args: { id: 'ID!', code: 'String!', password: 'String!' },
     resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
       let instance: any = (await resetRepo.findByIds([ args.id ]))[ 0 ]
+      if (!instance) {
+        throw new Error('Invalid id')
+      }
       let userRepo = container.get<Users>(names.AUTH_USERS_REPOSITORY)
 
       if (instance.data.secretCode === args.code) {
@@ -344,17 +355,16 @@ export default (container: App): void => {
           authedUser.name = newUser.data.name
         }
         let transporter: any = container.get(mailNames.MAIL_TRANSPORTER_SERVICE)
-        let msg: string = container.config().get('auth.registerMessage')
-        if (msg) {
-          msg = msg.replace(/<<name>>/, data.name)
-        } else {
-          msg = `<h3>Welcome ${data.name}, </h3><br> <p>Your registration is successful</p>`
-        }
+        let emailConfig: any = container.config().get('auth.emails.register')
         let mailOptions = {
           from: 'admin', // sender address
           to: data.email, // list of receivers
-          subject: authConfig.registerSubject, // Subject line
-          html: msg, // html body
+          subject: emailConfig.subject, // Subject line
+          html: render(emailConfig.templatePath, {
+            user: {
+              name: data.name,
+            },
+          }), // html body
         }
         try {
           await transporter.sendMail(mailOptions)

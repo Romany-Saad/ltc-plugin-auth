@@ -2,9 +2,9 @@ import { names as mailNames } from 'ltc-plugin-mail'
 import App from '@lattice/core/lib/App'
 import AMongoDbRepository from 'ltc-plugin-mongo/lib/abstractions/AMongoDbRepository'
 import { names } from '../../index'
-import bcrypt = require('bcrypt')
 import IPermission from '../../contracts/IPermission'
-import { assertValidExecutionArguments } from 'graphql/execution/execute'
+import { render } from 'ltc-plugin-templating/lib/utils'
+import bcrypt = require('bcrypt')
 
 
 export default (app: App) => {
@@ -14,9 +14,9 @@ export default (app: App) => {
     const availablePermissions: IPermission[] = authPlugin.availablePermissions
 
     const userRepo = app.get<AMongoDbRepository<any>>(names.AUTH_USERS_REPOSITORY)
-    let userConfig = app.config().get('auth')
+    let authConfig = app.config().get('auth')
     // check if admin user already exists
-    let user = (await userRepo.find({ email: userConfig.admin.email }))[ 0 ]
+    let user = (await userRepo.find({ email: authConfig.admin.email }))[ 0 ]
     // if exists and permissions > 0 then update
     if (user) {
       const allUserPermissions = []
@@ -36,13 +36,13 @@ export default (app: App) => {
     } else {
       // if user doesn't exist create it and give it all the permissions
       let userData = {
-        email: userConfig.admin.email,
-        password: await bcrypt.hash(userConfig.admin.password, 10),
+        email: authConfig.admin.email,
+        password: await bcrypt.hash(authConfig.admin.password, 10),
         status: 'active',
         permissions: availablePermissions.map(p => {
           return { name: p.name, data: {} }
         }),
-        name: userConfig.admin.name,
+        name: authConfig.admin.name,
       }
       let newUser = userRepo.parse(userData)
       let validation = await newUser.selfValidate()
@@ -56,13 +56,17 @@ export default (app: App) => {
       }
       //  send the user data to the specified email
       let transporter: any = app.get(mailNames.MAIL_TRANSPORTER_SERVICE)
+      let emailConfig: any = authConfig.emails.adminCreated
       let mailOptions = {
         from: 'admin', // sender address
-        to: userConfig.admin.email, // list of receivers
-        subject: userConfig.adminCreationSubject, // Subject line
-        html: `<h1>Your login data: </h1><br>` +
-          `<p>name: ${userConfig.admin.name}</p>` +
-          `<p>password: ${userConfig.admin.password}</p>`, // html body
+        to: authConfig.admin.email, // list of receivers
+        subject: authConfig.adminCreationSubject, // Subject line
+        html: render(emailConfig.templatePath, {
+          user: {
+            name: authConfig.admin.name,
+            password: authConfig.admin.password,
+          },
+        }),
       }
       transporter.sendMail(mailOptions)
         .catch((err: any) => {

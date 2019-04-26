@@ -35,6 +35,7 @@ describe('given schema is the GraphQlSchema object loaded with schemas from Pass
     console.log(user.get('email'))
     const q = `mutation resetPassword($email: String!) { resetPassword ( email: $email)}`
     const x = await graphql(schema, q, null, null, {email})
+    console.log(x)
     expect(x.data.resetPassword).toBe(true)
   })
   it('should verify a PasswordReset if data is valid', async () => {
@@ -42,7 +43,7 @@ describe('given schema is the GraphQlSchema object loaded with schemas from Pass
     //   console.log(getConnection())
     // console.log('here')
     let con = await getConnection()
-    let db = con.db('__testing__cyber-crafts_cms-plugin-auth')
+    let db = con.db(app.config().get('db.database'))
     let resetsCollection = db.collection('passwordResets')
     let reset = (await resetsCollection.find({}).toArray())[0]
     // console.log(reset)

@@ -12,7 +12,7 @@ const userSeeder = async (app, numOfSeeds, password, email = '') => {
     fake.status = faker.random.arrayElement(['pending', 'active', 'banned'])
     fake.permissions = [{
       name: 'permission.name',
-      data: {}
+      data: {},
     }]
     fake.password = await bcrypt.hash(password, 10)
     fake = userRepo.parse(fake)

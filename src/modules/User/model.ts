@@ -1,7 +1,7 @@
 import BaseModel from '@lattice/core/lib/abstractions/BaseModel'
 import c2v from 'c2v'
 import { ITypeValidator } from 'c2v/lib/contracts'
-import { arrayExists, mongoExists, mongoUnique } from 'ltc-plugin-mongo/lib/validators'
+import { mongoUnique } from 'ltc-plugin-mongo/lib/validators'
 import { names } from '../../index'
 
 export default class extends BaseModel {
@@ -14,8 +14,8 @@ export default class extends BaseModel {
       c2v.obj.requires('name', 'data')
         .keys({
           name: c2v.str,
-          data: c2v.obj
-        })
+          data: c2v.obj,
+        }),
     ),
     name: c2v.str.maxLength(32).minLength(2),
   })

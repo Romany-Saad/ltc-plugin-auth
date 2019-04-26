@@ -4,12 +4,12 @@ import { IStringKeyedObject } from '@lattice/core/lib/contracts'
 import { MongoClient } from 'mongodb'
 
 export default class extends AMongoDbRepository<Permission> {
-  parse (data: IStringKeyedObject): Permission {
-    return new Permission(data)
-  }
-
   constructor (client: MongoClient, collectionName: string) {
     super(client, collectionName)
+  }
+
+  parse (data: IStringKeyedObject): Permission {
+    return new Permission(data)
   }
 
 }

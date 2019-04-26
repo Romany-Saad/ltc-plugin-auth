@@ -10,10 +10,10 @@ export declare const names: {
 };
 export default class implements contracts.IPlugin {
     name: string;
-    private resolvers;
-    private customData;
     authConfig: IStringKeyedObject;
     availablePermissions: IPermission[];
+    private resolvers;
+    private customData;
     constructor(customData: ICustomAuthData);
     load(container: App): Promise<void>;
     setGraphQlAuthConfig(configs: IGraphqlAuthConfig[]): void;

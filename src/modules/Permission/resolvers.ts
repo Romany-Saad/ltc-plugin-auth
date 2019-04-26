@@ -1,7 +1,5 @@
 import App from '@lattice/core/lib/App'
-import { Permission, Permissions } from './'
-import { merge } from '../../utils'
-import { names } from '../../index'
+import { Permission } from './'
 import './schema'
 import { ResolveParams, schemaComposer } from 'graphql-compose'
 import { PermissionTC } from './schema'
@@ -26,7 +24,7 @@ export default (container: App): void => {
     type: '[Permission!]!',
     args: { skip: 'Int', limit: 'Int', filter: 'JSON' },
     resolve: async ({ source, args, context, info }: ResolveParams<App, any>): Promise<any> => {
-      const authPlugin: any  = source.getPlugin('cyber-crafts.cms-plugin-auth')
+      const authPlugin: any = source.getPlugin('cyber-crafts.cms-plugin-auth')
       const permissions = authPlugin.availablePermissions
       return permissions
     },
@@ -37,7 +35,7 @@ export default (container: App): void => {
     type: 'Int!',
     args: { filter: 'JSON' },
     resolve: async ({ source, args, context, info }: ResolveParams<App, any>): Promise<any> => {
-      const authPlugin: any  = source.getPlugin('cyber-crafts.cms-plugin-auth')
+      const authPlugin: any = source.getPlugin('cyber-crafts.cms-plugin-auth')
       const permissions = authPlugin.availablePermissions
       return permissions.length
     },

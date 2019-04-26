@@ -25,10 +25,10 @@ export const names = {
 export default class implements contracts.IPlugin {
 
   name: string = 'cyber-crafts.cms-plugin-auth'
-  private resolvers: object
-  private customData: ICustomAuthData
   public authConfig: IStringKeyedObject = {}
   public availablePermissions: IPermission[]
+  private resolvers: object
+  private customData: ICustomAuthData
 
   constructor (customData: ICustomAuthData) {
     this.customData = customData
