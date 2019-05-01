@@ -6,12 +6,6 @@ admin:
 user:
   defaultPermissions: [login]
 
-registerMessage: <h3>Welcome <<name>>, </h3><br> <p>Your registration is successful</p>
-resetPasswordMessage: "<h3>Dear <<name>>, </h3><br> <p>Your password reset key is: </p><br><span><<passwordResetCode>></span>"
-adminCreationSubject: Hasan Kutbi - admin account data
-addUserSubject: Hasan Kutbi - Welcome to Arabian drive
-registerSubject: Hasan Kutbi - Welcome to Arabian drive
-resetPasswordSubject: Hasan Kutbi - Password reset request
 emails:
   adminCreated:
     subject: Hasan Kutbi - admin account data
