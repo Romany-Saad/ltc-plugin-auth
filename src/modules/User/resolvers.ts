@@ -140,11 +140,24 @@ export default (container: App): void => {
     },
   })
 
+  UserTC.addResolver({
+    name: 'getRoles',
+    type: '[JSON]!',
+    resolve: async ({ source, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+      const roles = source.config().get('auth.roles')
+      console.log(JSON.stringify(roles))
+      return roles
+    },
+  })
+
   schemaComposer.rootQuery().addFields({ getUser: UserTC.getResolver('getUser') })
   schemaComposer.rootQuery().addFields({ getUsers: UserTC.getResolver('getUsers') })
   schemaComposer.rootQuery().addFields({ countUsers: UserTC.getResolver('countUsers') })
   schemaComposer.rootQuery().addFields({ login: UserTC.getResolver('login') })
   schemaComposer.rootQuery().addFields({ checkToken: UserTC.getResolver('checkToken') })
+  schemaComposer.rootQuery().addFields({ getRoles: UserTC.getResolver('getRoles') })
+
+
   // Mutations ===================================
   UserTC.addResolver({
     name: 'addUser',

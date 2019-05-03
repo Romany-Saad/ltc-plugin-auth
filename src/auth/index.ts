@@ -34,14 +34,25 @@ export default class Auth {
         description: '',
       }
     })
-    const defaultPermissions = this.app.config().get('auth.user.defaultPermissions')
+    const authConfig = this.app.config().get('auth')
+    const defaultPermissions = authConfig.user.defaultPermissions
+    const roles = authConfig.roles
     if (defaultPermissions) {
-      permissions.push(...defaultPermissions.map((p: string) => {
+      permissions.push(...defaultPermissions.map((p: any) => {
         return {
-          name: p,
+          name: p.name,
           description: '',
         }
       }))
+    }
+    for (let role of user.get('roles')) {
+      let currentRole = roles.find((configRole: any) => configRole.name === role)
+      if (currentRole) {
+        permissions.push({
+          name: currentRole.name,
+          description: '',
+        })
+      }
     }
     this.authorizationData.permissions = permissions
     return this.authorizationData.permissions

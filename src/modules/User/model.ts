@@ -17,6 +17,7 @@ export default class extends BaseModel {
           data: c2v.obj,
         }),
     ),
+    roles: c2v.arr.allItems(c2v.str),
     name: c2v.str.maxLength(32).minLength(2),
   })
 }
