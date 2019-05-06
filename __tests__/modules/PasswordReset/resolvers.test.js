@@ -34,10 +34,16 @@ describe('given schema is the GraphQlSchema object loaded with schemas from Pass
     const email = user.data.email
     console.log(user.get('email'))
     const q = `mutation resetPassword($email: String!) { resetPassword ( email: $email)}`
-    const x = await graphql(schema, q, null, null, {email})
+    const x = await graphql(schema, q, null, {
+      req: {
+        headers: {
+          host: 'localhost'
+        }
+      }
+    }, {email})
     console.log(x)
     expect(x.data.resetPassword).toBe(true)
-  })
+  }, 10000)
   it('should verify a PasswordReset if data is valid', async () => {
     // const data = fake(user)
     //   console.log(getConnection())
@@ -50,11 +56,12 @@ describe('given schema is the GraphQlSchema object loaded with schemas from Pass
     let id = reset._id
     let code = reset.secretCode
     let password = '12345699sd'
-    const q = `mutation verifyResetPassword($id: ID!, $code: String!, $password: String!)
-            { verifyResetPassword( id: $id, code: $code, password: $password)}`
+    const q = `mutation verifyResetPassword( $code: String!, $password: String!)
+            { verifyResetPassword (code: $code, password: $password)}`
     // console.log(reset)
     // console.log(id, code, password)
-    const x = await graphql(schema, q, null, null, {id, code, password})
+    const x = await graphql(schema, q, null, null, { code, password})
+    console.log(x)
     expect(x.data.verifyResetPassword).toBe(true)
   })
   /*

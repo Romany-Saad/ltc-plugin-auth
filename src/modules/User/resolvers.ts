@@ -40,7 +40,7 @@ const dataToModel = (data: any): any => {
 const resetDataToModel = async (user: any): Promise<any> => {
   let pr: IStringKeyedObject = {}
   pr.userId = user.getId()
-  pr.secretCode = new RandExp(/^.{64}$/).gen()
+  pr.secretCode = new RandExp(/^[a-z0-9]{8}$/).gen()
   pr.createdAt = new Date(Date.now())
   pr.state = 'pending'
   return pr
@@ -280,7 +280,7 @@ export default (container: App): void => {
               secretCode: newPasswordReset.get('secretCode'),
               resetId: newPasswordReset.getId(),
             },
-            host: context.req.headers.host
+            host: context.req.headers.host,
           }), // html body
           // text: newPasswordReset.get('secretCode'), // html body
         }
@@ -303,34 +303,36 @@ export default (container: App): void => {
   UserTC.addResolver({
     name: 'verifyResetPassword',
     type: 'Boolean!',
-    args: { id: 'ID!', code: 'String!', password: 'String!' },
+    args: { code: 'String!', password: 'String!' },
     resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
-      let instance: any = (await resetRepo.findByIds([ args.id ]))[ 0 ]
+      let instance: any = (await resetRepo.find({ secretCode: args.code }))[ 0 ]
       if (!instance) {
-        throw new Error('Invalid id')
+        throw new Error('Invalid code')
       }
-      let userRepo = container.get<Users>(names.AUTH_USERS_REPOSITORY)
-
-      if (instance.data.secretCode === args.code) {
-        let rpInstanceData: any = merge(transform(instance), { state: 'processed' })
-        instance.set(rpInstanceData)
-        let updatedRp = resetRepo.update([ instance ])
-
-        let user: any = (await userRepo.findByIds([ rpInstanceData.userId ]))[ 0 ]
-        let newPassword = await bcrypt.hash(args.password, 10)
-        let userData: any = merge(transform(user), { password: newPassword })
-        user.set(userData)
-        let updatedUser = userRepo.update([ user ])
-        return Promise.all([ updatedRp, updatedUser ])
-          .then(res => {
-            return true
-          })
-          .catch(err => {
-            return false
-          })
-      } else {
-        return false
+      const timeLimit = new Date(instance.get('createdAt'))
+      timeLimit.setMinutes(timeLimit.getMinutes() + 10)
+      if (new Date(timeLimit) < new Date()) {
+        console.log(new Date(timeLimit))
+        console.log(new Date())
+        throw new Error('secret code time out.')
       }
+      const userRepo = container.get<Users>(names.AUTH_USERS_REPOSITORY)
+      let rpInstanceData: any = merge(transform(instance), { state: 'processed' })
+      instance.set(rpInstanceData)
+      let updatedRp = resetRepo.update([ instance ])
+
+      let user: any = (await userRepo.findByIds([ rpInstanceData.userId ]))[ 0 ]
+      let newPassword = await bcrypt.hash(args.password, 10)
+      let userData: any = merge(transform(user), { password: newPassword })
+      user.set(userData)
+      let updatedUser = userRepo.update([ user ])
+      return Promise.all([ updatedRp, updatedUser ])
+        .then(res => {
+          return true
+        })
+        .catch(err => {
+          return false
+        })
     },
   })
   UserTC.addResolver({

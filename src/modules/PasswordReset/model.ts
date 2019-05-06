@@ -9,7 +9,7 @@ export default class extends BaseModel {
     .requires('userId', 'secretCode', 'createdAt', 'state')
     .keys({
       userId: c2v.str.attach(mongoExists(names.AUTH_USERS_REPOSITORY, 'users', '_id')),
-      secretCode: c2v.str.minLength(64),
+      secretCode: c2v.str.minLength(8),
       createdAt: c2v.date,
       state: c2v.str.in('pending', 'processed'),
     })
