@@ -280,7 +280,7 @@ export default (container: App): void => {
               secretCode: newPasswordReset.get('secretCode'),
               resetId: newPasswordReset.getId(),
             },
-            host: context.req.headers.host,
+            host: container.config().get('http.clientUrl')
           }), // html body
           // text: newPasswordReset.get('secretCode'), // html body
         }
