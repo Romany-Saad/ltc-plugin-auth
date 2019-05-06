@@ -8,12 +8,21 @@ type User {
     status: String!
     permissions: [UserPermission]
     name: String
+    roles: [String!]
 }`)
 
 TypeComposer.create(`
 type UserPermission {
   name: String!
   data: JSON
+}
+`)
+
+TypeComposer.create(`
+type UserRole {
+  name: String!
+  permissions: [UserPermission!]!
+  description: String
 }
 `)
 
@@ -45,6 +54,7 @@ input UserPatch {
     name: String
     permissions: [UserPermissionInput]
     status: String
+    roles: [String!]
 }`)
 
 InputTypeComposer.create(`

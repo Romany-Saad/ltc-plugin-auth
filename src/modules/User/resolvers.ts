@@ -142,7 +142,7 @@ export default (container: App): void => {
 
   UserTC.addResolver({
     name: 'getRoles',
-    type: '[JSON]!',
+    type: '[UserRole]!',
     resolve: async ({ source, args, context, info }: ResolveParams<App, any>): Promise<any> => {
       const roles = source.config().get('auth.roles')
       console.log(JSON.stringify(roles))
