@@ -4,8 +4,9 @@ admin:
   password: 123456sd
   email: habib@cyber-crafts.com
 user:
-  defaultPermissions: [login]
-
+  defaultPermissions:
+    -   name: perm1
+        data: {}
 emails:
   adminCreated:
     subject: Hasan Kutbi - admin account data
@@ -19,3 +20,10 @@ emails:
   resetPassword:
     subject: Hasan Kutbi - Password reset request
     templatePath: __tests__/modules/PasswordReset/resetPasswordTemp.ejs
+
+roles:
+  - name: some-role
+    permissions:
+      -   name: perm1
+          data: {}
+    description: something

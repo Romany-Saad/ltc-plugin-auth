@@ -74,6 +74,12 @@ describe('given schema is the GraphQlSchema object loaded with schemas from User
     expect(x.data.changeEmail).toBe(true)
   })
 
+  it('should return a list of roles on getRoles()', async () => {
+    const q = `query { getRoles }`
+    const x = await graphql(schema, q, app)
+    expect(x).toHaveProperty('data.getRoles.0.name')
+  })
+
   it('should return a list of Users on Query.getUsers()', async () => {
     const q = `query { getUsers { id, email } }`
     const x = await graphql(schema, q)
