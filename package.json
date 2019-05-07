@@ -32,6 +32,7 @@
     "ltc-plugin-graphql": "git+ssh://git@bitbucket.org/cyber-crafts/ltc-plugin-graphql.git",
     "ltc-plugin-mail": "git+ssh://git@bitbucket.org/cyber-crafts/ltc-plugin-mail.git",
     "ltc-plugin-mongo": "git+ssh://git@bitbucket.org/cyber-crafts/ltc-plugin-mongo.git",
+    "ltc-plugin-grecaptcha": "git+ssh://git@bitbucket.org/cyber-crafts/ltc-plugin-grecaptcha.git",
     "ltc-plugin-templating": "git+ssh://git@bitbucket.org/cyber-crafts/ltc-plugin-templating.git"
   },
   "dependencies": {

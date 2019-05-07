@@ -3,6 +3,7 @@ const App = require('@lattice/core/lib/App').default
 const ConfigPlugin = require('ltc-plugin-config').default
 const MongoPlugin = require('ltc-plugin-mongo').default
 const MailPlugin = require('ltc-plugin-mail').default
+const RecaptchaPlugin = require('ltc-plugin-grecaptcha').default
 const Plugin = require('../../lib/index').default
 //// here you can import other plugins
 
@@ -91,6 +92,7 @@ const plugin = new Plugin(customData)
 app.addPlugin(new ConfigPlugin(path.resolve(__dirname, '../config')))
 app.addPlugin(new MailPlugin())
 app.addPlugin(new MongoPlugin())
+app.addPlugin(new RecaptchaPlugin())
 app.addPlugin(plugin)
 
 async function registerPluginsAndInitApp() {

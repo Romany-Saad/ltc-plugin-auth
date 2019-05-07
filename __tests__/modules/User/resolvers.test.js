@@ -30,7 +30,8 @@ describe('given schema is the GraphQlSchema object loaded with schemas from User
 
   it('should register a User if data is valid and returns AuthedUser', async () => {
     const data = await fake('123456sd', null)
-    const q = `mutation register($data: NewUser!) { register (input: $data) { id , email, permissions{name} } }`
+    data.grecaptchaToken = '03AOLTBLROnueSTTeS6gRKyLLPV0CWW9ke6PRdG6fjLdWUoAK9-ZV2V5ayNBE8bd4KdUe-fBfaHeyDaYt5XzS1xZRgGrZkFihjAzWXrPbgvEQ3kqR91X-m7IV_eo80CaStw35JmzdVkDKKZgPdznvDjHDbJV_k7S0VK8b_ScCfyNIugHrfgbcyn4zNg1tdaKO57jdpo9aZEcjne2MSZg6AXr9J6dLUNWPoaehlegq6XoHfQo5vRwJlFq7NHeJHAkIVEAp48lWN8g_pozmKg1W6-5YUZG8ZYvikVu32rfGKRt-7z0wvogg5uWbVkGMNpdgcQe7scKZwr9Pg'
+    const q = `mutation register($data: Register!) { register (input: $data) { id , email, permissions{name} } }`
     const x = await graphql(schema, q, null, null, {data})
     expect(x).toHaveProperty('data.register.email')
     expect(x).toHaveProperty('data.register.id')

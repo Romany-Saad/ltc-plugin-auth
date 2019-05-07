@@ -350,7 +350,7 @@ export default (container: App): void => {
   UserTC.addResolver({
     name: 'register',
     type: 'AuthedUser!',
-    args: { input: 'NewUser!' },
+    args: { input: 'Register!' },
     resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
       const authConfig = container.config().get('auth')
       const data = await dataToModel(args.input)

@@ -50,6 +50,14 @@ input NewUser {
 }`)
 
 InputTypeComposer.create(`
+input Register {
+    email: String!
+    password: String!
+    name: String
+    grecaptchaToken: String!
+}`)
+
+InputTypeComposer.create(`
 input UserPatch {
     name: String
     permissions: [UserPermissionInput]
