@@ -145,7 +145,7 @@ export default (container: App): void => {
     type: '[UserRole]!',
     resolve: async ({ source, args, context, info }: ResolveParams<App, any>): Promise<any> => {
       const roles = source.config().get('auth.roles')
-      return roles
+      return roles || []
     },
   })
 
