@@ -45,13 +45,15 @@ export default class Auth {
         }
       }))
     }
-    for (let role of user.get('roles')) {
-      let currentRole = roles.find((configRole: any) => configRole.name === role)
-      if (currentRole) {
-        permissions.push({
-          name: currentRole.name,
-          description: '',
-        })
+    if (user.get('roles')) {
+      for (let role of user.get('roles')) {
+        let currentRole = roles.find((configRole: any) => configRole.name === role)
+        if (currentRole) {
+          permissions.push({
+            name: currentRole.name,
+            description: '',
+          })
+        }
       }
     }
     this.authorizationData.permissions = permissions

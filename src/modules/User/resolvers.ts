@@ -145,7 +145,6 @@ export default (container: App): void => {
     type: '[UserRole]!',
     resolve: async ({ source, args, context, info }: ResolveParams<App, any>): Promise<any> => {
       const roles = source.config().get('auth.roles')
-      console.log(JSON.stringify(roles))
       return roles
     },
   })
@@ -293,7 +292,7 @@ export default (container: App): void => {
               secretCode: newPasswordReset.get('secretCode'),
               resetId: newPasswordReset.getId(),
             },
-            host: container.config().get('http.clientUrl')
+            host: container.config().get('http.clientUrl'),
           }), // html body
           // text: newPasswordReset.get('secretCode'), // html body
         }
