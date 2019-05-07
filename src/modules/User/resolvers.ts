@@ -359,6 +359,7 @@ export default (container: App): void => {
       let newUser: any = repository.parse(data)
       let validation = await newUser.selfValidate()
       if (validation.success) {
+        delete newUser.data.grecaptchaToken
         newUser = (await repository.insert([ newUser ]))[ 0 ]
         let token = jwt.encode({ userId: newUser.getId() }, container.config().get('auth').secret)
         let authedUser: any = {
