@@ -45,6 +45,21 @@ const resetDataToModel = async (user: any): Promise<any> => {
   pr.state = 'pending'
   return pr
 }
+
+const getAuthedUser = (app: App, user: any) => {
+  let token = jwt.encode({ userId: user.getId() }, app.config().get('auth').secret)
+  let authedUser: any = {
+    id: user.getId(),
+    token: token,
+    permissions: user.get('permissions'),
+    email: user.get('email'),
+  }
+  if (user.get('name')) {
+    authedUser.name = user.get('name')
+  }
+  return authedUser
+}
+
 export default (container: App): void => {
 
   const repository = container
@@ -96,27 +111,11 @@ export default (container: App): void => {
       if (user.data.status === 'banned') {
         throw new Error('This user is banned.')
       }
-      /*let permissionsNames: any = await permissionRepo.findByIds(user.data.permissions, 1000)
-      if (permissionsNames.length > 0) {
-        permissionsNames = permissionsNames.map((permission: any) => {
-          return permission.data.name
-        })
-      }*/
       let serializedUser: IStringKeyedObject = transform(user)
       return bcrypt.compare(args.password, serializedUser.password)
         .then((res: Boolean) => {
           if (res) {
-            let token = jwt.encode({ userId: user.getId() }, container.config().get('auth').secret)
-            let authedUser: any = {
-              id: user.getId(),
-              token: token,
-              permissions: user.data.permissions,
-              email: user.data.email,
-            }
-            if (user.data.name) {
-              authedUser.name = user.data.name
-            }
-            return authedUser
+            return getAuthedUser(container, user)
           } else {
             throw new Error('Invalid credentials.')
           }
@@ -360,16 +359,6 @@ export default (container: App): void => {
       let validation = await newUser.selfValidate()
       if (validation.success) {
         newUser = (await repository.insert([ newUser ]))[ 0 ]
-        let token = jwt.encode({ userId: newUser.getId() }, container.config().get('auth').secret)
-        let authedUser: any = {
-          id: newUser.getId(),
-          token: token,
-          permissions: data.permissions,
-          email: newUser.data.email,
-        }
-        if (newUser.data.name) {
-          authedUser.name = newUser.data.name
-        }
         let transporter: any = container.get(mailNames.MAIL_TRANSPORTER_SERVICE)
         let emailConfig: any = container.config().get('auth.emails.register')
         let mailOptions = {
@@ -387,7 +376,7 @@ export default (container: App): void => {
         } catch (e) {
           console.log(e)
         }
-        return authedUser
+        return getAuthedUser(container, newUser)
       } else {
         throw new Error(JSON.stringify(validation.errors[ 0 ]))
       }
