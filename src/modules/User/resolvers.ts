@@ -349,7 +349,7 @@ export default (container: App): void => {
   UserTC.addResolver({
     name: 'register',
     type: 'AuthedUser!',
-    args: { input: 'NewUser!' },
+    args: { input: 'Register!' },
     resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
       const authConfig = container.config().get('auth')
       const data = await dataToModel(args.input)
@@ -358,6 +358,7 @@ export default (container: App): void => {
       let newUser: any = repository.parse(data)
       let validation = await newUser.selfValidate()
       if (validation.success) {
+        delete newUser.data.grecaptchaToken
         newUser = (await repository.insert([ newUser ]))[ 0 ]
         let transporter: any = container.get(mailNames.MAIL_TRANSPORTER_SERVICE)
         let emailConfig: any = container.config().get('auth.emails.register')
