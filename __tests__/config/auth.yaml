@@ -24,6 +24,6 @@ emails:
 roles:
   - name: some-role
     permissions:
-      -   name: perm1
+      -   name: perm2
           data: {}
     description: something

@@ -31,16 +31,31 @@ describe('given schema is the GraphQlSchema object loaded with schemas from User
   it('should register a User if data is valid and returns AuthedUser', async () => {
     const data = await fake('123456sd', null)
     data.grecaptchaToken = '03AOLTBLROnueSTTeS6gRKyLLPV0CWW9ke6PRdG6fjLdWUoAK9-ZV2V5ayNBE8bd4KdUe-fBfaHeyDaYt5XzS1xZRgGrZkFihjAzWXrPbgvEQ3kqR91X-m7IV_eo80CaStw35JmzdVkDKKZgPdznvDjHDbJV_k7S0VK8b_ScCfyNIugHrfgbcyn4zNg1tdaKO57jdpo9aZEcjne2MSZg6AXr9J6dLUNWPoaehlegq6XoHfQo5vRwJlFq7NHeJHAkIVEAp48lWN8g_pozmKg1W6-5YUZG8ZYvikVu32rfGKRt-7z0wvogg5uWbVkGMNpdgcQe7scKZwr9Pg'
-    const q = `mutation register($data: Register!) { register (input: $data) { id , email, permissions{name} } }`
+    const q = `mutation register($data: Register!) { register (input: $data) {
+      id,
+      name,
+      token,
+      permissions {name},
+      email,
+     } }`
     const x = await graphql(schema, q, null, null, {data})
     expect(x).toHaveProperty('data.register.email')
     expect(x).toHaveProperty('data.register.id')
   }, 10000)
 
   it('should login a User if data is valid and returns AuthedUser', async () => {
-    const q = `query login($email: String!, $password: String!) { login (email: $email, password: $password) { id , email, permissions{name}, token } }`
+    const q = `query login($email: String!, $password: String!) { login (email: $email, password: $password)
+     {
+      id,
+      name,
+      token,
+      permissions {name},
+      email,
+     } }`
     const x = await graphql(schema, q, null, null, {email: instance.data.email, password: '123456sd'})
     token = x.data.login.token
+    console.log(JSON.stringify(x, null, '\t'))
+
     expect(x).toHaveProperty('data.login.email')
     expect(x).toHaveProperty('data.login.id')
     expect(typeof x.data.login.permissions[0].name).toBe('string')

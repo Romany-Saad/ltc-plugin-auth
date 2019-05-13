@@ -47,11 +47,39 @@ const resetDataToModel = async (user: any): Promise<any> => {
 }
 
 const getAuthedUser = (app: App, user: any) => {
-  let token = jwt.encode({ userId: user.getId() }, app.config().get('auth').secret)
+  const authConfig = app.config().get('auth')
+  let token = jwt.encode({ userId: user.getId() }, authConfig.secret)
+  let permissions = user.get('permissions').map((p: any) => {
+    return {
+      name: p.name,
+      description: '',
+    }
+  })
+  const defaultPermissions = authConfig.user.defaultPermissions
+  const roles = authConfig.roles
+  if (defaultPermissions) {
+    permissions.push(...defaultPermissions.map((p: any) => {
+      return {
+        name: p.name,
+        description: '',
+      }
+    }))
+  }
+  if (user.get('roles')) {
+    for (let role of user.get('roles')) {
+      let currentRole = roles.find((configRole: any) => configRole.name === role)
+      if (currentRole) {
+        permissions.push({
+          name: currentRole.name,
+          description: '',
+        })
+      }
+    }
+  }
   let authedUser: any = {
     id: user.getId(),
     token: token,
-    permissions: user.get('permissions'),
+    permissions: permissions,
     email: user.get('email'),
   }
   if (user.get('name')) {
