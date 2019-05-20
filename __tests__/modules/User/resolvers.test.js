@@ -54,8 +54,6 @@ describe('given schema is the GraphQlSchema object loaded with schemas from User
      } }`
     const x = await graphql(schema, q, null, null, {email: instance.data.email, password: '123456sd'})
     token = x.data.login.token
-    console.log(JSON.stringify(x, null, '\t'))
-
     expect(x).toHaveProperty('data.login.email')
     expect(x).toHaveProperty('data.login.id')
     expect(typeof x.data.login.permissions[0].name).toBe('string')

@@ -69,9 +69,11 @@ const getAuthedUser = (app: App, user: any) => {
     for (let role of user.get('roles')) {
       let currentRole = roles.find((configRole: any) => configRole.name === role)
       if (currentRole) {
-        permissions.push({
-          name: currentRole.permissions.name,
-          data: currentRole.permissions.data,
+        currentRole.permissions.forEach((p: any) => {
+          permissions.push({
+            name: p.name,
+            data: p.data,
+          })
         })
       }
     }
@@ -351,8 +353,6 @@ export default (container: App): void => {
       const timeLimit = new Date(instance.get('createdAt'))
       timeLimit.setMinutes(timeLimit.getMinutes() + 10)
       if (new Date(timeLimit) < new Date()) {
-        console.log(new Date(timeLimit))
-        console.log(new Date())
         throw new Error('secret code time out.')
       }
       const userRepo = container.get<Users>(names.AUTH_USERS_REPOSITORY)
