@@ -52,7 +52,7 @@ const getAuthedUser = (app: App, user: any) => {
   let permissions = user.get('permissions').map((p: any) => {
     return {
       name: p.name,
-      description: '',
+      data: p.data,
     }
   })
   const defaultPermissions = authConfig.user.defaultPermissions
@@ -61,7 +61,7 @@ const getAuthedUser = (app: App, user: any) => {
     permissions.push(...defaultPermissions.map((p: any) => {
       return {
         name: p.name,
-        description: '',
+        data: p.data,
       }
     }))
   }
@@ -70,8 +70,8 @@ const getAuthedUser = (app: App, user: any) => {
       let currentRole = roles.find((configRole: any) => configRole.name === role)
       if (currentRole) {
         permissions.push({
-          name: currentRole.name,
-          description: '',
+          name: currentRole.permissions.name,
+          data: currentRole.permissions.data,
         })
       }
     }
