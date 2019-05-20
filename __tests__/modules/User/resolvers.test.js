@@ -57,6 +57,29 @@ describe('given schema is the GraphQlSchema object loaded with schemas from User
     expect(x).toHaveProperty('data.login.email')
     expect(x).toHaveProperty('data.login.id')
     expect(typeof x.data.login.permissions[0].name).toBe('string')
+  }, 10000)
+
+  it('should verify token on checkToken', async () => {
+    const loginQuery = `query login($email: String!, $password: String!) { login (email: $email, password: $password)
+     {
+      id,
+      name,
+      token,
+      permissions {name},
+      email,
+     } }`
+    const loginRes = await graphql(schema, loginQuery, null, null, {email: instance.data.email, password: '123456sd'})
+    token = loginRes.data.login.token
+    const q = `query checkToken($token: String!) { checkToken (token: $token){
+      id,
+      name,
+      token,
+      permissions {name},
+      email,
+     
+    }}`
+    const x = await graphql(schema, q, null, null, {token})
+    expect(x.data.checkToken).toHaveProperty('id')
   })
 
   it('should return User data on Mutation.changePassword()', async () => {
@@ -64,11 +87,7 @@ describe('given schema is the GraphQlSchema object loaded with schemas from User
     const x = await graphql(schema, q)
     expect(x.data.changePassword).toBe(true)
   })
-  it('should verify token on checkToken', async () => {
-    const q = `query checkToken($token: String!) { checkToken (token: $token)}`
-    const x = await graphql(schema, q, null, null, {token})
-    expect(x.data.checkToken).toBe(true)
-  })
+
 
   it('should retrieve authed user data from authentication class', async () => {
     let authed = new Auth(app, `Bearer ${token}`)
