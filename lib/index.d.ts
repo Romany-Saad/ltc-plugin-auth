@@ -1,4 +1,4 @@
-import App, { contracts, IStringKeyedObject } from '@lattice/core';
+import App, { contracts, IStringKeyedObject } from '@cyber-crafts/ltc-core';
 import ICustomAuthData from './contracts/ICustomAuthData';
 import IPermission from './contracts/IPermission';
 import IRestAuthConfig from './contracts/IRestAuthConfig';

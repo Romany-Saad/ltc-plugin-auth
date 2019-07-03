@@ -1,5 +1,5 @@
-import IStringKeyedObject from '@lattice/core/lib/contracts/IStringKeyedObject';
-import App from '@lattice/core';
+import IStringKeyedObject from '@cyber-crafts/ltc-core/lib/contracts/IStringKeyedObject';
+import App from '@cyber-crafts/ltc-core';
 export default class Auth {
     protected authorizationData: IStringKeyedObject;
     protected app: App;

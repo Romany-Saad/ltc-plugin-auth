@@ -1,4 +1,4 @@
-import App, { IStringKeyedObject } from '@lattice/core'
+import App, { IStringKeyedObject } from '@cyber-crafts/ltc-core'
 import { schemaComposer } from 'graphql-compose'
 import { graphQlDefaultAuth, restDefaultAuth } from './helpers'
 import IGraphqlAuthConfig from '../contracts/IGraphqlAuthConfig'

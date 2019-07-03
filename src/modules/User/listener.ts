@@ -1,5 +1,5 @@
 import { names as mailNames } from 'ltc-plugin-mail'
-import App from '@lattice/core/lib/App'
+import App from '@cyber-crafts/ltc-core/lib/App'
 import AMongoDbRepository from 'ltc-plugin-mongo/lib/abstractions/AMongoDbRepository'
 import { names } from '../../index'
 import IPermission from '../../contracts/IPermission'

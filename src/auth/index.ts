@@ -1,6 +1,6 @@
 import jwt = require('jwt-simple')
-import IStringKeyedObject from '@lattice/core/lib/contracts/IStringKeyedObject'
-import App from '@lattice/core'
+import IStringKeyedObject from '@cyber-crafts/ltc-core/lib/contracts/IStringKeyedObject'
+import App from '@cyber-crafts/ltc-core'
 import { names } from '../index'
 import AMongoDbRepository from 'ltc-plugin-mongo/lib/abstractions/AMongoDbRepository'
 

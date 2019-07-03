@@ -1,4 +1,4 @@
-import BaseModel from '@lattice/core/lib/abstractions/BaseModel'
+import BaseModel from '@cyber-crafts/ltc-core/lib/abstractions/BaseModel'
 import c2v from 'c2v'
 import { ITypeValidator } from 'c2v/lib/contracts'
 import { mongoExists } from 'ltc-plugin-mongo/lib/validators'

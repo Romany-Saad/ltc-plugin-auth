@@ -1,6 +1,6 @@
 const app = require('./app')
 const mainAuthMiddleware = require('./../../lib/auth/middlewares/mainAuthMiddleware').default
-const coreNames = require('@lattice/core').names
+const coreNames = require('@cyber-crafts/ltc-core').names
 
 app.express.use(async (req, res, next) => {
   req.user = {

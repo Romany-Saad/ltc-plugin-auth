@@ -1,4 +1,4 @@
-import App from '@lattice/core/lib/App'
+import App from '@cyber-crafts/ltc-core/lib/App'
 import { PasswordResets } from './'
 import { names } from '../../index'
 import './schema'

@@ -19,7 +19,7 @@
     "test:staged"
   ],
   "peerDependencies": {
-    "@lattice/core": "*",
+    "@cyber-crafts/ltc-core": "*",
     "ltc-plugin-config": "*",
     "ltc-plugin-graphql": "*",
     "ltc-plugin-mail": "*",
@@ -27,7 +27,7 @@
     "ltc-plugin-templating": "*"
   },
   "devDependencies": {
-    "@lattice/core": "git+ssh://git@bitbucket.org/cyber-crafts/lattice-core.git",
+    "@cyber-crafts/ltc-core": "git+ssh://git@bitbucket.org/cyber-crafts/lattice-core.git",
     "ltc-plugin-config": "git+ssh://git@bitbucket.org/cyber-crafts/ltc-plugin-config.git",
     "ltc-plugin-graphql": "git+ssh://git@bitbucket.org/cyber-crafts/ltc-plugin-graphql.git",
     "ltc-plugin-grecaptcha": "git+ssh://git@bitbucket.org/cyber-crafts/ltc-plugin-grecaptcha.git",

@@ -1,5 +1,5 @@
 const path = require('path')
-const App = require('@lattice/core/lib/App').default
+const App = require('@cyber-crafts/ltc-core/lib/App').default
 const ConfigPlugin = require('ltc-plugin-config').default
 const MongoPlugin = require('ltc-plugin-mongo').default
 const MailPlugin = require('ltc-plugin-mail').default

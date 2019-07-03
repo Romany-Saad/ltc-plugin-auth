@@ -1,5 +1,5 @@
 import { getEndpointAuthConfig } from '../helpers'
-import App from '@lattice/core/lib/App'
+import App from '@cyber-crafts/ltc-core/lib/App'
 
 const mainAuthMiddleware = (app: App) => (req: any, res: any, next: any) => {
   console.log('main auth started')

@@ -1,4 +1,4 @@
-import App from '@lattice/core/lib/App'
+import App from '@cyber-crafts/ltc-core/lib/App'
 import { Permission } from './'
 import './schema'
 import { ResolveParams, schemaComposer } from 'graphql-compose'

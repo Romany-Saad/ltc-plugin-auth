@@ -1,4 +1,4 @@
-import App, { IStringKeyedObject } from '@lattice/core'
+import App, { IStringKeyedObject } from '@cyber-crafts/ltc-core'
 
 const UrlPattern = require('url-pattern')
 
