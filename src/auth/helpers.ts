@@ -34,7 +34,9 @@ export const getEndpointAuthConfig = (app: App, endpoint: string, httpMethod: st
   const graphqlMatch = endpoint.match(/\/graphql.*/g)
   if (graphqlMatch === null) {
     const endpointAuthConfig = authConfigs.rest.find((config: IStringKeyedObject) => {
-      const pattern = new UrlPattern(config.path)
+      const pattern = new UrlPattern(config.path, {
+        segmentValueCharset: 'a-zA-Z0-9-_~ %\.',
+      })
       const trimmedEndpoint = endpoint.split('?')[ 0 ]
       return pattern.match(trimmedEndpoint) && (config.method === httpMethod)
     })
