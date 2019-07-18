@@ -6,9 +6,10 @@ const mainAuthMiddleware = (app: App) => (req: any, res: any, next: any) => {
   const authConfig = getEndpointAuthConfig(app, req.url, req.method)
   if (!authConfig) {
     res.status(403)
-    res.send('access denied.')
+    next('access denied.')
+  } else {
+    next()
   }
-  next()
 }
 
 export default mainAuthMiddleware
