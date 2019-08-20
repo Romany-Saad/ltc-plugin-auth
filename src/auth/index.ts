@@ -49,10 +49,12 @@ export default class Auth {
       for (let role of user.get('roles')) {
         let currentRole = roles.find((configRole: any) => configRole.name === role)
         if (currentRole) {
-          permissions.push({
-            name: currentRole.name,
-            description: '',
-          })
+          permissions.push(currentRole.permissions.map((permission: any) => {
+            return {
+              name: permission.name,
+              description: '',
+            }
+          }))
         }
       }
     }
