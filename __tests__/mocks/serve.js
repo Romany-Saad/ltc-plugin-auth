@@ -1,4 +1,4 @@
-const app = require('./app')
+const app = require('./app').app
 const mainAuthMiddleware = require('./../../lib/auth/middlewares/mainAuthMiddleware').default
 const coreNames = require('@cyber-crafts/ltc-core').names
 
