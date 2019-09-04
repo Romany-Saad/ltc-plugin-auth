@@ -9,6 +9,7 @@ type User {
     permissions: [UserPermission]
     name: String
     roles: [String!]
+    authentication: JSON
 }`)
 
 TypeComposer.create(`

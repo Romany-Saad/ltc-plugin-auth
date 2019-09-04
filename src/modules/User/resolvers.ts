@@ -46,9 +46,13 @@ const resetDataToModel = async (user: any): Promise<any> => {
   return pr
 }
 
-const getAuthedUser = (app: App, user: any) => {
+const getAuthedUser = (app: App, user: any, authData: { authedVia: string, lastAuthenticated: any }) => {
   const authConfig = app.config().get('auth')
-  let token = jwt.encode({ userId: user.getId() }, authConfig.secret)
+  let token = jwt.encode({
+    userId: user.getId(),
+    authenticatedVia: authData.authedVia || 'api',
+    lastAuthenticated: authData.lastAuthenticated || new Date(),
+  }, authConfig.secret)
   let permissions = user.get('permissions').map((p: any) => {
     return {
       name: p.name,
@@ -143,9 +147,23 @@ export default (container: App): void => {
       }
       let serializedUser: IStringKeyedObject = transform(user)
       return bcrypt.compare(args.password, serializedUser.password)
-        .then((res: Boolean) => {
+        .then(async (res: Boolean) => {
           if (res) {
-            return getAuthedUser(container, user)
+            const authenticationDate = new Date()
+            let authentication = user.get('authentication')
+            authentication.api.push(authenticationDate)
+            const data = merge(transform(user), {
+              authentication: authentication,
+            })
+            user.set(data)
+            if (await repository.update([ user ])) {
+              return getAuthedUser(container, user, {
+                authedVia: 'api',
+                lastAuthenticated: authenticationDate,
+              })
+            } else {
+              throw new Error('user authentication update failed.')
+            }
           } else {
             throw new Error('Invalid credentials.')
           }
@@ -165,7 +183,10 @@ export default (container: App): void => {
       if (user[ 0 ].get('status') != 'active') {
         return null
       }
-      return getAuthedUser(container, user[ 0 ])
+      return getAuthedUser(container, user[ 0 ], {
+        lastAuthenticated: token.lastAuthenticated,
+        authedVia: token.authedVia,
+      })
     },
   })
 
@@ -383,6 +404,10 @@ export default (container: App): void => {
       const data = await dataToModel(args.input)
       data.permissions = []
       data.status = 'active'
+      const authenticationDate = new Date()
+      data.authentication = {
+        'api': [ authenticationDate ],
+      }
       let newUser: any = repository.parse(data)
       let validation = await newUser.selfValidate()
       if (validation.success) {
@@ -405,9 +430,31 @@ export default (container: App): void => {
         } catch (e) {
           console.log(e)
         }
-        return getAuthedUser(container, newUser)
+        return getAuthedUser(container, newUser, {
+          authedVia: 'api',
+          lastAuthenticated: authenticationDate,
+        })
       } else {
         throw new Error(JSON.stringify(validation.errors[ 0 ]))
+      }
+    },
+  })
+  UserTC.addResolver({
+    name: 'logout',
+    type: 'Boolean!',
+    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+      const user = (await repository.findByIds([ context.user.userId ]))[ 0 ]
+      if (!user) {
+        throw new Error('Error retrieving user')
+      } else {
+        const auth = user.get('authentication')
+        const currentTimestampIndex = auth[ context.user.authenticatedVia ].indexOf(context.user.lastAuthenticated)
+        if (currentTimestampIndex === -1) {
+          return true
+        } else {
+          auth[ context.user.authenticatedVia ].splice(currentTimestampIndex, 1)
+          return repository.update([user])
+        }
       }
     },
   })
@@ -420,4 +467,5 @@ export default (container: App): void => {
   schemaComposer.rootMutation().addFields({ resetPassword: UserTC.getResolver('resetPassword') })
   schemaComposer.rootMutation().addFields({ verifyResetPassword: UserTC.getResolver('verifyResetPassword') })
   schemaComposer.rootMutation().addFields({ register: UserTC.getResolver('register') })
+  schemaComposer.rootMutation().addFields({ logout: UserTC.getResolver('logout') })
 }
