@@ -412,6 +412,7 @@ export default (container: App): void => {
     args: { platform: 'String!', input: 'JSON!' },
     resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
       // get user client id token fom front end
+      const authConfig = container.config().get('auth')
       let tokenPayload
       if (args.platform === 'google') {
         try {
@@ -419,11 +420,16 @@ export default (container: App): void => {
         } catch (e) {
           throw new Error('Error verifying token.')
         }
+        if (tokenPayload.aud != authConfig.google.client_id) {
+          throw new Error('Error verifying token.')
+        }
         // check if user already exists
         const user = (await repository.find({ email: tokenPayload.email }))[ 0 ]
         // if email already exists then create a jwt and sent it back
         if (user) {
-          const authedData = loginUser(container, user, 'google')
+          const authedData = loginUser(container, user, 'google', {
+            idToken: args.input.idToken,
+          })
           if (authedData) {
             return authedData
           } else {
@@ -439,8 +445,10 @@ export default (container: App): void => {
           let newUser = repository.parse(newUserData)
           const validation = await newUser.selfValidate()
           if (validation.success) {
-            newUser = (await repository.insert([newUser]))[0]
-            const authedData = loginUser(container, newUser, 'google')
+            newUser = (await repository.insert([ newUser ]))[ 0 ]
+            const authedData = loginUser(container, newUser, 'google', {
+              idToken: args.input.idToken,
+            })
             if (authedData) {
               return authedData
             } else {

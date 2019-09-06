@@ -1,4 +1,4 @@
-import App from '@cyber-crafts/ltc-core'
+import App, { IStringKeyedObject } from '@cyber-crafts/ltc-core'
 import { merge } from '../../utils'
 import { User, Users } from './index'
 
@@ -72,7 +72,7 @@ export const getAuthedUser = (app: App, user: any, authData: { authedVia: string
 }
 
 
-export const loginUser = async (app: App, user: any, loginVia: string) => {
+export const loginUser = async (app: App, user: any, loginVia: string, platformData: IStringKeyedObject) => {
   const repository = app.get<Users>(names.AUTH_USERS_REPOSITORY)
   const authenticationDate = new Date()
   let authentication = user.get('authentication')
@@ -81,8 +81,10 @@ export const loginUser = async (app: App, user: any, loginVia: string) => {
   } else {
     authentication[ loginVia ] = [ authenticationDate ]
   }
+  const socialMediaData = merge(user.get('socialMediaData'), platformData)
   const data = merge(transform(user), {
-    authentication: authentication,
+    authentication,
+    socialMediaData
   })
   user.set(data)
   if (await repository.update([ user ])) {
