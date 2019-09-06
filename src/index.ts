@@ -92,3 +92,9 @@ export default class implements contracts.IPlugin {
     }
   }
 }
+
+// new endpiont socialMediaLogin
+// get user client id token fom front end
+// get user info using the client id token
+// if email already exists then create a jwt and sent it back
+// if not then register the user and log him in

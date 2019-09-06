@@ -8,18 +8,13 @@ import { IStringKeyedObject } from '@cyber-crafts/ltc-core/lib/contracts'
 import { names as mailNames } from 'ltc-plugin-mail'
 import { UserTC } from './schema'
 import { render } from 'ltc-plugin-templating/lib/utils'
+import { getAuthedUser, loginUser, transform, verifyGoogleIdToken } from './helpers'
+import { auth } from 'google-auth-library'
 import bcrypt = require('bcrypt')
 import jwt = require('jwt-simple')
 
 const RandExp = require('randexp')
 
-
-const transform = (item: User): object => {
-  const obj = item.serialize()
-  obj.id = item.getId()
-  delete obj[ item.getIdFieldName() ]
-  return obj
-}
 
 const dataToModel = (data: any): any => {
   if (data.password) {
@@ -46,53 +41,6 @@ const resetDataToModel = async (user: any): Promise<any> => {
   return pr
 }
 
-const getAuthedUser = (app: App, user: any, authData: { authedVia: string, lastAuthenticated: any }) => {
-  const authConfig = app.config().get('auth')
-  let token = jwt.encode({
-    userId: user.getId(),
-    authenticatedVia: authData.authedVia || 'api',
-    lastAuthenticated: authData.lastAuthenticated || new Date(),
-  }, authConfig.secret)
-  let permissions = user.get('permissions').map((p: any) => {
-    return {
-      name: p.name,
-      data: p.data,
-    }
-  })
-  const defaultPermissions = authConfig.user.defaultPermissions
-  const roles = authConfig.roles
-  if (defaultPermissions) {
-    permissions.push(...defaultPermissions.map((p: any) => {
-      return {
-        name: p.name,
-        data: p.data,
-      }
-    }))
-  }
-  if (user.get('roles')) {
-    for (let role of user.get('roles')) {
-      let currentRole = roles.find((configRole: any) => configRole.name === role)
-      if (currentRole) {
-        currentRole.permissions.forEach((p: any) => {
-          permissions.push({
-            name: p.name,
-            data: p.data,
-          })
-        })
-      }
-    }
-  }
-  let authedUser: any = {
-    id: user.getId(),
-    token: token,
-    permissions: permissions,
-    email: user.get('email'),
-  }
-  if (user.get('name')) {
-    authedUser.name = user.get('name')
-  }
-  return authedUser
-}
 
 export default (container: App): void => {
 
@@ -453,7 +401,54 @@ export default (container: App): void => {
           return true
         } else {
           auth[ context.user.authenticatedVia ].splice(currentTimestampIndex, 1)
-          return repository.update([user])
+          return repository.update([ user ])
+        }
+      }
+    },
+  })
+  UserTC.addResolver({
+    name: 'socialMediaLogin',
+    type: 'AuthedUser!',
+    args: { platform: 'String!', input: 'JSON!' },
+    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+      // get user client id token fom front end
+      let tokenPayload
+      if (args.platform === 'google') {
+        try {
+          tokenPayload = await verifyGoogleIdToken(container, args.input.idToken)
+        } catch (e) {
+          throw new Error('Error verifying token.')
+        }
+        // check if user already exists
+        const user = (await repository.find({ email: tokenPayload.email }))[ 0 ]
+        // if email already exists then create a jwt and sent it back
+        if (user) {
+          const authedData = loginUser(container, user, 'google')
+          if (authedData) {
+            return authedData
+          } else {
+            throw new Error('Error occurred on login.')
+          }
+        } else {
+          // if not then register the user and log him in
+          const newUserData = {
+            email: tokenPayload.email,
+            status: 'active',
+            name: tokenPayload.name,
+          }
+          let newUser = repository.parse(newUserData)
+          const validation = await newUser.selfValidate()
+          if (validation.success) {
+            newUser = (await repository.insert([newUser]))[0]
+            const authedData = loginUser(container, newUser, 'google')
+            if (authedData) {
+              return authedData
+            } else {
+              throw new Error('Error occurred on login.')
+            }
+          } else {
+            throw new Error(JSON.stringify(validation.errors[ 0 ]))
+          }
         }
       }
     },
@@ -468,4 +463,5 @@ export default (container: App): void => {
   schemaComposer.rootMutation().addFields({ verifyResetPassword: UserTC.getResolver('verifyResetPassword') })
   schemaComposer.rootMutation().addFields({ register: UserTC.getResolver('register') })
   schemaComposer.rootMutation().addFields({ logout: UserTC.getResolver('logout') })
+  schemaComposer.rootMutation().addFields({ socialMediaLogin: UserTC.getResolver('socialMediaLogin') })
 }

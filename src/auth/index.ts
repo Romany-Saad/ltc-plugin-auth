@@ -24,7 +24,7 @@ export default class Auth {
   async initUserPermissions () {
     const userRepo = this.app.get<AMongoDbRepository<any>>(names.AUTH_USERS_REPOSITORY)
     let user = (await userRepo.findByIds([ this.authorizationData.userId ]))[ 0 ]
-    if (!user) {
+    if (!user || user.get('authentication')[this.authorizationData.authedVia].indexOf(this.authorizationData.authedVia) === -1) {
       throw new Error('Invalid token')
     }
 
