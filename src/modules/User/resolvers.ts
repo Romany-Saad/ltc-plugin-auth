@@ -13,6 +13,8 @@ import { auth } from 'google-auth-library'
 import bcrypt = require('bcrypt')
 import jwt = require('jwt-simple')
 
+const rp = require('request-promise')
+
 const RandExp = require('randexp')
 
 
@@ -456,6 +458,85 @@ export default (container: App): void => {
             }
           } else {
             throw new Error(JSON.stringify(validation.errors[ 0 ]))
+          }
+        }
+      } else if (args.platform === 'facebook') {
+        console.log('in facebook')
+        //  receive user access token
+        const userAccessToken = args.input.accessToken
+        console.log(userAccessToken)
+        // get app access token
+        const appTokenRequestOptions = {
+          uri: 'https://graph.facebook.com/oauth/access_token',
+          qs: {
+            client_id: authConfig.facebook.appId,
+            client_secret: args.input.appSecret,
+            grant_type: 'client_credentials',
+          },
+          json: true,
+        }
+        let appTokenRes
+        try {
+         appTokenRes = await rp(appTokenRequestOptions)
+        } catch (e) {
+          console.log(`[app token response error] ${e}`)
+        }
+        console.log(`[app token response] ${appTokenRes}`)
+        const appToken = appTokenRes.access_token
+
+        //  verify access token
+        const verificationOptions = {
+          uri: 'https://graph.facebook.com/debug_token',
+          qs: {
+            access_token: appToken,
+            input_token: userAccessToken,
+          },
+          json: true,
+        }
+        const verificationRes = await rp(verificationOptions)
+        if (verificationRes.is_valid) {
+          throw new Error('invalid access token.')
+        } else if (verificationRes.app_id === authConfig.facebook.appId) {
+          //   if user id exists log him in
+          const user = (await repository.find({ 'socialMediaData.facebook.userId': verificationRes.user_id }))[ 0 ]
+          if (user) {
+            return loginUser(container, user, 'facebook', {
+              accessToken: userAccessToken,
+              userId: verificationRes.user_id,
+            })
+          } else {
+            //   else
+            //  check the user data from facebook
+            const userDataOptions = {
+              uri: `https://graph.facebook.com/${verificationRes.user_id}`,
+              qs: {
+                access_token: appToken,
+                fields: 'email,name',
+              },
+              json: true,
+            }
+            const userDataRes = await rp(userDataOptions)
+            const newUserData = {
+              email: userDataRes.email,
+              status: 'active',
+              name: userDataRes.name,
+            }
+            let newUser = repository.parse(newUserData)
+            const validation = await newUser.selfValidate()
+            if (validation.success) {
+              newUser = (await repository.insert([ newUser ]))[ 0 ]
+              const authedData = loginUser(container, user, 'facebook', {
+                accessToken: userAccessToken,
+                userId: verificationRes.user_id,
+              })
+              if (authedData) {
+                return authedData
+              } else {
+                throw new Error('Error occurred on login.')
+              }
+            } else {
+              throw new Error(JSON.stringify(validation.errors[ 0 ]))
+            }
           }
         }
       }

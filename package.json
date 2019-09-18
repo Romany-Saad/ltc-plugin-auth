@@ -42,6 +42,7 @@
     "@types/node": "^9.6.48",
     "@types/passport": "^1.0.1",
     "@types/passport-google-oauth": "^1.0.41",
+    "@types/request-promise": "^4.1.44",
     "bcrypt": "^3.0.6",
     "express-list-endpoints": "^4.0.1",
     "faker": "^4.1.0",
@@ -52,6 +53,8 @@
     "passport-google-oauth": "^2.0.0",
     "pre-commit": "^1.2.2",
     "randexp": "^0.5.3",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.4",
     "url-pattern": "^1.0.3"
   }
 }

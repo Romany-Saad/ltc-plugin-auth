@@ -59,6 +59,22 @@ describe('given schema is the GraphQlSchema object loaded with schemas from User
     expect(typeof x.data.login.permissions[0].name).toBe('string')
   }, 10000)
 
+  it('should login a User using facebook if data is valid and returns AuthedUser', async () => {
+    const q = `mutation socialMediaLogin($platform: String!, $input: JSON!) { socialMediaLogin (platform: $platform, input: $input)
+     {
+      id,
+      name,
+      token,
+      permissions {name},
+      email,
+     } }`
+    const x = await graphql(schema, q, null, null, {platform: 'facebook', input: {accessToken: "EAAIwfbyId8wBAIlM9qdT0v1dVKwZAHGVXamvJBxniLLFVAjjhZB2IvsvIdZC8lQjtBmxgYOR5Gd7CJGUcomiXIfwkxZBZCPe5m9hgeA0ipLYvknuG1uiTQsTDKzDjnSwaxc2PolKERieLdqZBtD4izE72hmNlXlXhBZCfl25vjNRv3a7c6wvV1x2S5ZCKq3mRHBzZAlT0ZAcrNdwZDZD"}})
+    // token = x.data.login.token
+    expect(x).toHaveProperty('data.socialMediaLogin.email')
+    expect(x).toHaveProperty('data.socialMediaLogin.id')
+    expect(typeof x.data.socialMediaLogin.permissions[0].name).toBe('string')
+  }, 10000)
+
   it('should verify token on checkToken', async () => {
     const loginQuery = `query login($email: String!, $password: String!) { login (email: $email, password: $password)
      {
