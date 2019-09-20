@@ -5,12 +5,14 @@ const MongoPlugin = require('ltc-plugin-mongo').default
 const MailPlugin = require('ltc-plugin-mail').default
 const RecaptchaPlugin = require('ltc-plugin-grecaptcha').default
 const Plugin = require('../../lib/index').default
+const coreNames = require('@cyber-crafts/ltc-core').names
+const passport = require('passport')
+
 //// here you can import other plugins
 
 
 // creating a new app instance
 const app = new App()
-
 const customData = {
   permissions: [
     {
@@ -42,6 +44,22 @@ const customData = {
     graphql: [],
     rest: [],
   },
+  rest: [
+    {
+      method: 'GET',
+      path: '/twitter/oauth',
+      authorize: (route) => (req, res, next) => {
+        next()
+      },
+    },
+    {
+      method: 'GET',
+      path: '/oauth/callback',
+      authorize: (route) => (req, res, next) => {
+        next()
+      },
+    }
+  ],
 }
 /*
 

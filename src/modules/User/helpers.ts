@@ -1,10 +1,10 @@
 import App, { IStringKeyedObject } from '@cyber-crafts/ltc-core'
 import { merge } from '../../utils'
 import { User, Users } from './index'
+import { names } from '../../index'
 
 const { OAuth2Client } = require('google-auth-library')
 import jwt = require('jwt-simple')
-import { names } from '../../index'
 
 export const transform = (item: User): object => {
   const obj = item.serialize()
@@ -76,7 +76,11 @@ export const loginUser = async (app: App, user: any, loginVia: string, platformD
   const repository = app.get<Users>(names.AUTH_USERS_REPOSITORY)
   const authenticationDate = new Date()
   let authentication = user.get('authentication')
-  if (authentication[ loginVia ]) {
+  if (!authentication) {
+    authentication = {
+      [ loginVia ]: [ authenticationDate ],
+    }
+  } else if (authentication[ loginVia ]) {
     authentication[ loginVia ].push(authenticationDate)
   } else {
     authentication[ loginVia ] = [ authenticationDate ]
@@ -84,7 +88,7 @@ export const loginUser = async (app: App, user: any, loginVia: string, platformD
   const socialMediaData = merge(user.get('socialMediaData'), platformData)
   const data = merge(transform(user), {
     authentication,
-    socialMediaData
+    socialMediaData,
   })
   user.set(data)
   if (await repository.update([ user ])) {

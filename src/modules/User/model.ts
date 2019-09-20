@@ -23,5 +23,11 @@ export default class extends BaseModel {
     grecaptchaToken: c2v.str.attach(verifyModelRecaptcha('register')),
     authentication: c2v.obj,
     socialMediaData: c2v.obj
+  // every key in socialMediaData (keys should be twitter, facebook, google, ...etc)
+  // should be an arary of objects and each object should have a userId
+    // [{
+    //   userId: 'something',
+    //   ...tokensAndOtherData
+    // }]
   })
 }

@@ -14,6 +14,11 @@ import ICustomAuthData from './contracts/ICustomAuthData'
 import IPermission from './contracts/IPermission'
 import IRestAuthConfig from './contracts/IRestAuthConfig'
 import IGraphqlAuthConfig from './contracts/IGraphqlAuthConfig'
+import { loginUser } from './modules/User/helpers'
+import { auth } from 'google-auth-library'
+import passport = require('passport')
+import { socialMediaLogin } from './utils'
+
 
 export const names = {
   // AUTH_PERMISSIONS_REPOSITORY: Symbol(namer.resolve('auth', 'permissions', 'repository')),
@@ -69,6 +74,22 @@ export default class implements contracts.IPlugin {
     })
 
     userListener(container)
+
+    container.express.get('/twitter/oauth', passport.authenticate('twitter'))
+    container.express.get('/oauth/callback',
+      (req, res, next) => {
+        if (req.query.platform === 'twitter') {
+          passport.authenticate('twitter')(req, res, next)
+        } else {
+          res.status(400)
+          res.json({
+            status: 'fail',
+            msg: 'Invalid platform.',
+          })
+        }
+      },
+      socialMediaLogin(container)
+    )
   }
 
   setGraphQlAuthConfig (configs: IGraphqlAuthConfig[]) {

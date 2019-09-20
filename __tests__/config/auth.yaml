@@ -35,3 +35,8 @@ google:
 facebook:
   appId: 616266545526732
   appSecret: 72c7ef0980d64e8890fcaa1dc886a649
+
+twitter:
+  consumerKey: wUYMxpqWbeOV8u3TZzLV0rrBK
+  consumerSecret: zLYe80TuCJ2Kikqg3eFVjGSJvkXydbSR4luHFbzIcWoYvu2t9I
+  callbackURL: '/oauth/callback'
