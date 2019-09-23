@@ -4,6 +4,7 @@ const coreNames = require('@cyber-crafts/ltc-core').names
 const passport = require('passport')
 const TwitterStrategy = require('passport-twitter')
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy
+const FacebookStrategy = require('passport-facebook').Strategy
 const expressSession = require('express-session')
 
 
@@ -29,6 +30,9 @@ app.emitter.on(coreNames.EV_PLUGINS_LOADED, async (items) => {
   })
   const twitterConfig = app.config().get('auth.twitter')
   const googleConfig = app.config().get('auth.google')
+  const facebookConfig = app.config().get('auth.facebook')
+
+
   passport.use(new GoogleStrategy({
       clientID: googleConfig.client_id,
       clientSecret: googleConfig.client_secret,
@@ -40,6 +44,17 @@ app.emitter.on(coreNames.EV_PLUGINS_LOADED, async (items) => {
       return cb(null, profile)
     }
   ));
+  passport.use(new FacebookStrategy({
+      clientID: facebookConfig.appId,
+      clientSecret: facebookConfig.appSecret,
+      callbackURL: "/oauth/callback?platform=facebook",
+      profileFields: ['id', 'displayName', 'email']
+    },
+    function(accessToken, refreshToken, profile, cb) {
+      return cb(null, profile)
+    }
+  ));
+
   passport.use(new TwitterStrategy({
       consumerKey: twitterConfig.consumerKey,
       consumerSecret: twitterConfig.consumerSecret,

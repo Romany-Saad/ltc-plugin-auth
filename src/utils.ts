@@ -60,13 +60,20 @@ const getNormalizedUserData = (platform: string, userData: any) => {
       emails: userData.emails
     }
   }
+  else if (platform === 'facebook') {
+    return {
+      id: userData.id,
+      username: userData.displayName,
+      emails: userData.emails
+    }
+  }
 }
 
 //TODO: change res and next params
 export const socialMediaLogin = async (container: App, platform: string, userData: any, res: any, next: any) => {
   // TODO: this needs to be more modular
   console.log(platform)
-  // if (platform === 'google') {
+  // if (platform === 'facebook') {
   //   res.send(userData)
   // }
   userData = getNormalizedUserData(platform, userData)

@@ -76,6 +76,8 @@ export default class implements contracts.IPlugin {
 
     container.express.get('/twitter/oauth', passport.authenticate('twitter'))
 
+    container.express.get('/facebook/oauth', passport.authenticate('facebook'))
+
     container.express.get('/google/oauth',
       passport.authenticate('google', { scope: 'profile email' }))
     // passport.authenticate('google', {scope: 'openid,profile,email'}))
@@ -86,8 +88,8 @@ export default class implements contracts.IPlugin {
           passport.authenticate('twitter')(req, res, next)
         } else if (req.query.platform === 'google') {
           passport.authenticate('google', { scope: 'profile email' })(req, res, next)
-        } else if (req.query.platform === 'google') {
-          passport.authenticate('google', { scope: 'profile email' })(req, res, next)
+        } else if (req.query.platform === 'facebook') {
+          passport.authenticate('facebook')(req, res, next)
         } else {
           res.status(400)
           res.json({
