@@ -41,6 +41,7 @@
     "@types/jwt-simple": "^0.5.33",
     "@types/node": "^9.6.48",
     "@types/passport": "^1.0.1",
+    "@types/passport-facebook": "^2.1.9",
     "@types/passport-google-oauth": "^1.0.41",
     "@types/passport-twitter": "^1.0.34",
     "@types/request-promise": "^4.1.44",

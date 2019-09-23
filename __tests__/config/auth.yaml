@@ -28,6 +28,11 @@ roles:
           data: {}
     description: something
 
+availableLoginPlatforms:
+  - twitter
+  - facebook
+  - google
+
 google:
   client_id: 36576950896-7tas1css3lum6o63th2h4vercieq2n82.apps.googleusercontent.com
   client_secret: Kzbhohfo6MaIBYbW-IYzXm2I

@@ -8,7 +8,6 @@ import jwt = require('jwt-simple')
 
 export const transform = (item: User): object => {
   const obj = item.serialize()
-  obj.id = item.getId()
   delete obj[ item.getIdFieldName() ]
   return obj
 }

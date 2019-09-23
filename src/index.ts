@@ -15,8 +15,10 @@ import IPermission from './contracts/IPermission'
 import IRestAuthConfig from './contracts/IRestAuthConfig'
 import IGraphqlAuthConfig from './contracts/IGraphqlAuthConfig'
 import { auth } from 'google-auth-library'
-import { socialMediaLogin } from './utils'
+import { initializeSocialMediaLoginPlatforms, socialMediaLogin } from './utils'
 import passport = require('passport')
+
+const expressSession = require('express-session')
 
 
 export const names = {
@@ -45,6 +47,11 @@ export default class implements contracts.IPlugin {
   async load (container: App): Promise<void> {
     const config: IConfiguration = container.config()
     const connection: Connection = container.get(mongoNames.MONGO_SERVICES_CONNECTION)
+    container.emitter.on(coreNames.EV_PLUGINS_LOADING, async (items) => {
+      container.express.use(expressSession({ secret: 'keyboard cat', resave: true, saveUninitialized: true }))
+      container.express.use(passport.initialize())
+    })
+    initializeSocialMediaLoginPlatforms(container)
 
     // const permissions = new Permissions(connection.getClient(), `permissions`)
     // container.bind<Permissions>(names.AUTH_PERMISSIONS_REPOSITORY).toConstantValue(permissions)
@@ -98,7 +105,17 @@ export default class implements contracts.IPlugin {
           })
         }
       },
-      (req, res, next) => socialMediaLogin(container, req.query.platform, req.user, res, next),
+      (req, res, next) => {
+        return socialMediaLogin(container, req.query.platform, req.user)
+          .then(data => {
+            if (data.success) {
+              return res.json(data.payload)
+            } else {
+              return next(data.msg)
+            }
+          })
+          .catch(e => res.sendStatus(500))
+      },
     )
   }
 
