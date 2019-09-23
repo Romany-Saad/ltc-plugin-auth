@@ -14,10 +14,9 @@ import ICustomAuthData from './contracts/ICustomAuthData'
 import IPermission from './contracts/IPermission'
 import IRestAuthConfig from './contracts/IRestAuthConfig'
 import IGraphqlAuthConfig from './contracts/IGraphqlAuthConfig'
-import { loginUser } from './modules/User/helpers'
 import { auth } from 'google-auth-library'
-import passport = require('passport')
 import { socialMediaLogin } from './utils'
+import passport = require('passport')
 
 
 export const names = {
@@ -76,10 +75,19 @@ export default class implements contracts.IPlugin {
     userListener(container)
 
     container.express.get('/twitter/oauth', passport.authenticate('twitter'))
+
+    container.express.get('/google/oauth',
+      passport.authenticate('google', { scope: 'profile email' }))
+    // passport.authenticate('google', {scope: 'openid,profile,email'}))
+
     container.express.get('/oauth/callback',
       (req, res, next) => {
         if (req.query.platform === 'twitter') {
           passport.authenticate('twitter')(req, res, next)
+        } else if (req.query.platform === 'google') {
+          passport.authenticate('google', { scope: 'profile email' })(req, res, next)
+        } else if (req.query.platform === 'google') {
+          passport.authenticate('google', { scope: 'profile email' })(req, res, next)
         } else {
           res.status(400)
           res.json({
@@ -88,7 +96,7 @@ export default class implements contracts.IPlugin {
           })
         }
       },
-      socialMediaLogin(container)
+      (req, res, next) => socialMediaLogin(container, req.query.platform, req.user, res, next),
     )
   }
 
@@ -113,9 +121,3 @@ export default class implements contracts.IPlugin {
     }
   }
 }
-
-// new endpiont socialMediaLogin
-// get user client id token fom front end
-// get user info using the client id token
-// if email already exists then create a jwt and sent it back
-// if not then register the user and log him in

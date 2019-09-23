@@ -10,14 +10,11 @@ export const merge = (...items: Array<any>) => {
   }
   return result
 }
-
-export const socialMediaLogin = (container: App) => async (req: any, res: any, next: any) => {
-  // TODO: this needs to be more modular
-  const reqUser: any = req.user
-  const userRepo = container.get<Users>(names.AUTH_USERS_REPOSITORY)
-  // check if user already exists
-  const emails = reqUser.emails.map((email: any) => email.value)
-  const user = (await userRepo.find({
+const getSocialMediaUser = async (app: App, platform: string, userData: any) => {
+  const userRepo = app.get<Users>(names.AUTH_USERS_REPOSITORY)
+  if (platform === 'twitter') {
+    const emails = userData.emails.map((email: any) => email.value)
+    return (await userRepo.find({
       $or: [
         {
           email: {
@@ -25,39 +22,85 @@ export const socialMediaLogin = (container: App) => async (req: any, res: any, n
           },
         },
         {
-          'socialMediaData.twitter.userId': reqUser.id,
+          'socialMediaData.twitter.userId': userData.id,
         },
       ],
-    })
-  )[ 0 ]
+    }))[ 0 ]
+  }
+  else {
+    if (platform === 'google') {
+      const emails = userData.emails.map((email: any) => email.value)
+      return (await userRepo.find({
+        $or: [
+          {
+            email: {
+              $in: emails,
+            },
+          },
+          {
+            'socialMediaData.google.userId': userData.id,
+          },
+        ],
+      }))[ 0 ]
+    }
+  }
+}
+
+const getNormalizedUserData = (platform: string, userData: any) => {
+  if (platform === 'twitter') {
+    return {
+      id: userData.id,
+      username: userData.username,
+      emails: userData.emails
+    }
+  } else if (platform === 'google') {
+    return {
+      id: userData.id,
+      username: userData.displayName,
+      emails: userData.emails
+    }
+  }
+}
+
+//TODO: change res and next params
+export const socialMediaLogin = async (container: App, platform: string, userData: any, res: any, next: any) => {
+  // TODO: this needs to be more modular
+  console.log(platform)
+  // if (platform === 'google') {
+  //   res.send(userData)
+  // }
+  userData = getNormalizedUserData(platform, userData)
+  const userRepo = container.get<Users>(names.AUTH_USERS_REPOSITORY)
+  // check if user already exists
+  const user = await getSocialMediaUser(container, platform, userData)
   // if email already exists then create a jwt and sent it back
   if (user) {
     let socialMediaData = user.get('socialMediaData')
-    if (socialMediaData && socialMediaData.twitter) {
-      const idExists = socialMediaData.twitter.findIndex((account: any) => {
-        return account.userId === reqUser.id
+    if (socialMediaData && socialMediaData[platform]) {
+      const idExists = socialMediaData[platform].findIndex((account: any) => {
+        return account.userId === userData.id
       })
       if (idExists === -1) {
-        socialMediaData.twitter.push({
-          userId: reqUser.id,
+        // TODO: change this to take dynamic data
+        socialMediaData[platform].push({
+          userId: userData.id,
         })
       }
     } else {
       if (socialMediaData) {
-        socialMediaData.twitter = [ {
-          userId: reqUser.id,
+        socialMediaData[platform] = [ {
+          userId: userData.id,
         } ]
       } else {
         socialMediaData = {
-          twitter: [ {
-            userId: reqUser.id,
+          [platform]: [ {
+            userId: userData.id,
           } ],
         }
       }
     }
-    const authedData = await loginUser(container, user, 'twitter', socialMediaData)
+    const authedData = await loginUser(container, user, platform, socialMediaData)
     if (authedData) {
-      console.log(`[authed from user] ${authedData}`)
       return res.json(authedData)
     } else {
       return next('Error occurred on login.')
@@ -65,20 +108,20 @@ export const socialMediaLogin = (container: App) => async (req: any, res: any, n
 
   } else {
     // if not then register the user and log him in
-    console.log(reqUser.emails)
+    console.log(userData.emails)
     const newUserData: IStringKeyedObject = {
-      email: reqUser.emails[ 0 ].value,
+      email: userData.emails[ 0 ].value,
       status: 'active',
-      name: reqUser.username,
+      name: userData.username,
       permissions: [],
     }
     let newUser = userRepo.parse(newUserData)
     const validation = await newUser.selfValidate()
     if (validation.success) {
       newUser = (await userRepo.insert([ newUser ]))[ 0 ]
-      const authedData = await loginUser(container, newUser, 'twitter', {
-        twitter: [ {
-          userId: reqUser,
+      const authedData = await loginUser(container, newUser, platform, {
+        [platform]: [ {
+          userId: userData,
         } ],
       })
       if (authedData) {
