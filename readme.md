@@ -72,11 +72,11 @@ An array of roles that contains each user role's name, array of permissions and 
 # permissions: 
 permissions for any given user is calculated on each request by combining his specific permissions (stored in database), default permissions and his roles' permissions.
 
-#API requirement to use social media login:
+# API requirement to use social media login:
 For every project that needs to use them express session and passport need to be initialized on the API 
 and the new configs should be added
 
-##How to use:
+## How to use:
 Make a GET request to one of the three endpoints for each social media:
 - `/twitter/oauth`
 - `/facebook/oauth`
