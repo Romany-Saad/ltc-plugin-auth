@@ -196,7 +196,7 @@ export const initializeSocialMediaLoginPlatforms = (app: App) => {
           consumerKey: twitterConfig.consumerKey,
           consumerSecret: twitterConfig.consumerSecret,
           userProfileURL: 'https://api.twitter.com/1.1/account/verify_credentials.json?include_email=true',
-          callbackURL: `${twitterConfig.callbackURL}?platform=twitter`,
+          callbackURL: `/oauth/callback?platform=twitter`,
         },
         function (token: any, tokenSecret: any, profile: any, cb: any) {
           profile.token = token
