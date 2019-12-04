@@ -1,6 +1,6 @@
-import { InputTypeComposer, TypeComposer } from 'graphql-compose'
+import { InputTypeComposer, ObjectTypeComposer, schemaComposer } from 'graphql-compose'
 
-export const UserTC = TypeComposer.create(`
+export const UserTC = ObjectTypeComposer.create(`
 type User {
     id: ID!
     email: String!
@@ -9,45 +9,47 @@ type User {
     permissions: [UserPermission]
     name: String
     roles: [String!]
-}`)
+}`, schemaComposer)
 
-TypeComposer.create(`
+ObjectTypeComposer.create(`
 type UserPermission {
   name: String!
   data: JSON
 }
-`)
+`, schemaComposer)
 
-TypeComposer.create(`
+ObjectTypeComposer.create(`
 type UserRole {
   name: String!
   permissions: [UserPermission!]!
   description: String
 }
-`)
+`, schemaComposer)
 
-InputTypeComposer.create(`
-input UserPermissionInput {
-  name: String!
-  data: JSON
-}
-`)
-
-TypeComposer.create(`
+ObjectTypeComposer.create(`
 type AuthedUser {
     id: ID!
     name: String
     token: String!
     permissions: [UserPermission!]!
     email: String!
-}`)
+}`, schemaComposer)
+
+// ================== Input ===================
+
+InputTypeComposer.create(`
+input UserPermissionInput {
+  name: String!
+  data: JSON
+}
+`, schemaComposer)
 
 InputTypeComposer.create(`
 input NewUser {
     email: String!
     password: String!
     name: String
-}`)
+}`, schemaComposer)
 
 InputTypeComposer.create(`
 input Register {
@@ -55,7 +57,7 @@ input Register {
     password: String!
     name: String
     grecaptchaToken: String!
-}`)
+}`, schemaComposer)
 
 InputTypeComposer.create(`
 input UserPatch {
@@ -63,7 +65,7 @@ input UserPatch {
     permissions: [UserPermissionInput]
     status: String
     roles: [String!]
-}`)
+}`, schemaComposer)
 
 InputTypeComposer.create(`
 input UserCount {
@@ -72,4 +74,4 @@ input UserCount {
     status: String!
     permissions: [UserPermissionInput]
     name: String
-}`)
+}`, schemaComposer)

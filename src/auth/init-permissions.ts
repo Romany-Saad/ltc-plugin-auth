@@ -25,8 +25,8 @@ function loadAuthConfigs (app: App) {
 }
 
 function getGraphQlAuthConfigs () {
-  let queryEndpoints: any = schemaComposer.rootQuery().getFields()
-  let mutationEndpoints: any = schemaComposer.rootMutation().getFields()
+  let queryEndpoints: any = schemaComposer.Query.getFields()
+  let mutationEndpoints: any = schemaComposer.Mutation.getFields()
   const queryAuthConfigs = generateGraphqlEndpointsConfig(queryEndpoints, 'query')
   const mutationAuthConfigs = generateGraphqlEndpointsConfig(mutationEndpoints, 'mutation')
   return [ ...queryAuthConfigs, ...mutationAuthConfigs ]

@@ -1,7 +1,7 @@
 import App from '@cyber-crafts/ltc-core/lib/App'
 import { Permission } from './'
 import './schema'
-import { ResolveParams, schemaComposer } from 'graphql-compose'
+import { ResolverResolveParams, schemaComposer } from 'graphql-compose'
 import { PermissionTC } from './schema'
 
 const transform = (item: Permission): object => {
@@ -23,7 +23,7 @@ export default (container: App): void => {
     name: 'getPermissions',
     type: '[Permission!]!',
     args: { skip: 'Int', limit: 'Int', filter: 'JSON' },
-    resolve: async ({ source, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+    resolve: async ({ source, args, context, info }: ResolverResolveParams<App, any>): Promise<any> => {
       const authPlugin: any = source.getPlugin('cyber-crafts.cms-plugin-auth')
       const permissions = authPlugin.availablePermissions
       return permissions
@@ -34,13 +34,13 @@ export default (container: App): void => {
     name: 'countPermissions',
     type: 'Int!',
     args: { filter: 'JSON' },
-    resolve: async ({ source, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+    resolve: async ({ source, args, context, info }: ResolverResolveParams<App, any>): Promise<any> => {
       const authPlugin: any = source.getPlugin('cyber-crafts.cms-plugin-auth')
       const permissions = authPlugin.availablePermissions
       return permissions.length
     },
   })
 
-  schemaComposer.rootQuery().addFields({ getPermissions: PermissionTC.getResolver('getPermissions') })
-  schemaComposer.rootQuery().addFields({ countPermissions: PermissionTC.getResolver('countPermissions') })
+  schemaComposer.Query.addFields({ getPermissions: PermissionTC.getResolver('getPermissions') })
+  schemaComposer.Query.addFields({ countPermissions: PermissionTC.getResolver('countPermissions') })
 }

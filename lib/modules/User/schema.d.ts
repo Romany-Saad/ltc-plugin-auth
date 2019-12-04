@@ -1,2 +1,2 @@
-import { TypeComposer } from 'graphql-compose';
-export declare const UserTC: TypeComposer<{}>;
+import { ObjectTypeComposer } from 'graphql-compose';
+export declare const UserTC: ObjectTypeComposer<any, any>;

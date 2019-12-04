@@ -1,12 +1,12 @@
-import { InputTypeComposer, TypeComposer } from 'graphql-compose'
+import { InputTypeComposer, ObjectTypeComposer, schemaComposer } from 'graphql-compose'
 
-export const PermissionTC = TypeComposer.create(`
+export const PermissionTC = ObjectTypeComposer.create(`
 type Permission {
     name: String!
     endpoint: String!
     protected: Boolean!
     type: String!
-}`)
+}`, schemaComposer)
 /*
 
 InputTypeComposer.create(`
@@ -30,4 +30,4 @@ input PermissionCount {
     name: String
     endpoint: String
     protected: Boolean
-}`)
+}`, schemaComposer)

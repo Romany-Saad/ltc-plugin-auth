@@ -3,7 +3,7 @@ import { User, Users } from './'
 import { merge } from '../../utils'
 import { names } from '../../index'
 import './schema'
-import { ResolveParams, schemaComposer } from 'graphql-compose'
+import { ResolverResolveParams, schemaComposer } from 'graphql-compose'
 import { IStringKeyedObject } from '@cyber-crafts/ltc-core/lib/contracts'
 import { names as mailNames } from 'ltc-plugin-mail'
 import { UserTC } from './schema'
@@ -107,7 +107,7 @@ export default (container: App): void => {
     name: 'getUser',
     type: 'User!',
     args: { id: 'ID!' },
-    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+    resolve: async ({ obj, args, context, info }: ResolverResolveParams<App, any>): Promise<any> => {
       const items = await repository.findByIds([ args.id ])
       return (items.length !== 1) ? undefined : transform(items[ 0 ])
     },
@@ -116,7 +116,7 @@ export default (container: App): void => {
     name: 'getUsers',
     type: '[User!]!',
     args: { skip: 'Int', limit: 'Int', filter: 'JSON' },
-    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+    resolve: async ({ obj, args, context, info }: ResolverResolveParams<App, any>): Promise<any> => {
       const users = await repository.find(args.filter, args.limit, args.skip)
       return users.map(transform)
     },
@@ -125,7 +125,7 @@ export default (container: App): void => {
     name: 'countUsers',
     type: 'Int!',
     args: { filter: 'JSON' },
-    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+    resolve: async ({ obj, args, context, info }: ResolverResolveParams<App, any>): Promise<any> => {
       return await repository.count(args.filter)
     },
   })
@@ -133,7 +133,7 @@ export default (container: App): void => {
     name: 'login',
     type: 'AuthedUser!',
     args: { email: 'String!', password: 'String!' },
-    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+    resolve: async ({ obj, args, context, info }: ResolverResolveParams<App, any>): Promise<any> => {
       let user: any = (await repository.find({ email: args.email }))[ 0 ]
       if (!user) {
         throw new Error('can not find user')
@@ -156,7 +156,7 @@ export default (container: App): void => {
     name: 'checkToken',
     type: 'AuthedUser',
     args: { token: 'String!' },
-    resolve: async ({ source, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+    resolve: async ({ source, args, context, info }: ResolverResolveParams<App, any>): Promise<any> => {
       let token = jwt.decode(args.token, container.config().get('auth').secret)
       let user = await repository.findByIds([ token.userId ])
       if (user.length === 0) {
@@ -172,18 +172,18 @@ export default (container: App): void => {
   UserTC.addResolver({
     name: 'getRoles',
     type: '[UserRole]!',
-    resolve: async ({ source, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+    resolve: async ({ source, args, context, info }: ResolverResolveParams<App, any>): Promise<any> => {
       const roles = source.config().get('auth.roles')
       return roles || []
     },
   })
 
-  schemaComposer.rootQuery().addFields({ getUser: UserTC.getResolver('getUser') })
-  schemaComposer.rootQuery().addFields({ getUsers: UserTC.getResolver('getUsers') })
-  schemaComposer.rootQuery().addFields({ countUsers: UserTC.getResolver('countUsers') })
-  schemaComposer.rootQuery().addFields({ login: UserTC.getResolver('login') })
-  schemaComposer.rootQuery().addFields({ checkToken: UserTC.getResolver('checkToken') })
-  schemaComposer.rootQuery().addFields({ getRoles: UserTC.getResolver('getRoles') })
+  schemaComposer.Query.addFields({ getUser: UserTC.getResolver('getUser') })
+  schemaComposer.Query.addFields({ getUsers: UserTC.getResolver('getUsers') })
+  schemaComposer.Query.addFields({ countUsers: UserTC.getResolver('countUsers') })
+  schemaComposer.Query.addFields({ login: UserTC.getResolver('login') })
+  schemaComposer.Query.addFields({ checkToken: UserTC.getResolver('checkToken') })
+  schemaComposer.Query.addFields({ getRoles: UserTC.getResolver('getRoles') })
 
 
   // Mutations ===================================
@@ -191,7 +191,7 @@ export default (container: App): void => {
     name: 'addUser',
     type: 'User',
     args: { input: 'NewUser!' },
-    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+    resolve: async ({ obj, args, context, info }: ResolverResolveParams<App, any>): Promise<any> => {
       const data = await dataToModel(args.input)
       data.permissions = []
       data.status = 'active'
@@ -226,7 +226,7 @@ export default (container: App): void => {
     name: 'deleteUser',
     type: 'Boolean!',
     args: { id: 'ID!' },
-    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+    resolve: async ({ obj, args, context, info }: ResolverResolveParams<App, any>): Promise<any> => {
       const item = (await repository.findByIds([ args.id ]))
       if (item && await repository.remove(item)) {
         return true
@@ -239,7 +239,7 @@ export default (container: App): void => {
     name: 'updateUser',
     type: 'User!',
     args: { id: 'ID!', input: 'UserPatch!' },
-    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+    resolve: async ({ obj, args, context, info }: ResolverResolveParams<App, any>): Promise<any> => {
       const items = (await repository.findByIds([ args.id ]))
       if (items.length > 0) {
         const item = items[ 0 ]
@@ -257,7 +257,7 @@ export default (container: App): void => {
     name: 'changePassword',
     type: 'Boolean!',
     args: { id: 'ID!', oldPassword: 'String!', newPassword: 'String!' },
-    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+    resolve: async ({ obj, args, context, info }: ResolverResolveParams<App, any>): Promise<any> => {
       const items = (await repository.findByIds([ args.id ]))
       if (items.length > 0) {
         const item: any = items[ 0 ]
@@ -279,7 +279,7 @@ export default (container: App): void => {
     name: 'changeEmail',
     type: 'Boolean!',
     args: { id: 'ID!', newEmail: 'String!' },
-    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+    resolve: async ({ obj, args, context, info }: ResolverResolveParams<App, any>): Promise<any> => {
       const items = (await repository.findByIds([ args.id ]))
       if (items.length > 0) {
         const item = items[ 0 ]
@@ -297,7 +297,7 @@ export default (container: App): void => {
     name: 'resetPassword',
     type: 'Boolean!',
     args: { email: 'String!' },
-    resolve: async ({ source, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+    resolve: async ({ source, args, context, info }: ResolverResolveParams<App, any>): Promise<any> => {
       const authConfig = container.config().get('auth')
       let userRepo = container.get<Users>(names.AUTH_USERS_REPOSITORY)
       let user = (await userRepo.find({ email: args.email }))[ 0 ]
@@ -345,7 +345,7 @@ export default (container: App): void => {
     name: 'verifyResetPassword',
     type: 'Boolean!',
     args: { code: 'String!', password: 'String!' },
-    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+    resolve: async ({ obj, args, context, info }: ResolverResolveParams<App, any>): Promise<any> => {
       let instance: any = (await resetRepo.find({ secretCode: args.code }))[ 0 ]
       if (!instance) {
         throw new Error('Invalid code')
@@ -378,7 +378,7 @@ export default (container: App): void => {
     name: 'register',
     type: 'AuthedUser!',
     args: { input: 'Register!' },
-    resolve: async ({ obj, args, context, info }: ResolveParams<App, any>): Promise<any> => {
+    resolve: async ({ obj, args, context, info }: ResolverResolveParams<App, any>): Promise<any> => {
       const authConfig = container.config().get('auth')
       const data = await dataToModel(args.input)
       data.permissions = []
@@ -412,12 +412,12 @@ export default (container: App): void => {
     },
   })
 
-  schemaComposer.rootMutation().addFields({ addUser: UserTC.getResolver('addUser') })
-  schemaComposer.rootMutation().addFields({ deleteUser: UserTC.getResolver('deleteUser') })
-  schemaComposer.rootMutation().addFields({ updateUser: UserTC.getResolver('updateUser') })
-  schemaComposer.rootMutation().addFields({ changePassword: UserTC.getResolver('changePassword') })
-  schemaComposer.rootMutation().addFields({ changeEmail: UserTC.getResolver('changeEmail') })
-  schemaComposer.rootMutation().addFields({ resetPassword: UserTC.getResolver('resetPassword') })
-  schemaComposer.rootMutation().addFields({ verifyResetPassword: UserTC.getResolver('verifyResetPassword') })
-  schemaComposer.rootMutation().addFields({ register: UserTC.getResolver('register') })
+  schemaComposer.Mutation.addFields({ addUser: UserTC.getResolver('addUser') })
+  schemaComposer.Mutation.addFields({ deleteUser: UserTC.getResolver('deleteUser') })
+  schemaComposer.Mutation.addFields({ updateUser: UserTC.getResolver('updateUser') })
+  schemaComposer.Mutation.addFields({ changePassword: UserTC.getResolver('changePassword') })
+  schemaComposer.Mutation.addFields({ changeEmail: UserTC.getResolver('changeEmail') })
+  schemaComposer.Mutation.addFields({ resetPassword: UserTC.getResolver('resetPassword') })
+  schemaComposer.Mutation.addFields({ verifyResetPassword: UserTC.getResolver('verifyResetPassword') })
+  schemaComposer.Mutation.addFields({ register: UserTC.getResolver('register') })
 }
