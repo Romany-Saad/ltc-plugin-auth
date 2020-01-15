@@ -27,3 +27,7 @@ roles:
       -   name: perm2
           data: {}
     description: something
+
+maxAllowedFailedAttempts: 5
+lockOutPeriod: 60                         # in seconds
+passwordExpirationPeriod: 100             # in days

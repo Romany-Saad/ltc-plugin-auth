@@ -9,6 +9,9 @@ type User {
     permissions: [UserPermission]
     name: String
     roles: [String!]
+    lockedUntil: Date
+    failedLoginAttempts: Int
+    passwordExpiresAt: Date
 }`, schemaComposer)
 
 ObjectTypeComposer.create(`

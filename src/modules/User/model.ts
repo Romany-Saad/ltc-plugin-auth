@@ -21,5 +21,8 @@ export default class extends BaseModel {
     roles: c2v.arr.allItems(c2v.str),
     name: c2v.str.maxLength(32).minLength(2),
     grecaptchaToken: c2v.str.attach(verifyModelRecaptcha('register')),
+    lockedUntil: c2v.date,
+    failedLoginAttempts: c2v.int.min(0, false),
+    passwordExpiresAt: c2v.date
   })
 }

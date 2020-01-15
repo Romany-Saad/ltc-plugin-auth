@@ -1,6 +1,6 @@
 import App from '@cyber-crafts/ltc-core'
 import { User, Users } from './'
-import { merge } from '../../utils'
+import { addToDate, DateAdditionTypes, merge } from '../../utils'
 import { names } from '../../index'
 import './schema'
 import { ResolverResolveParams, schemaComposer } from 'graphql-compose'
@@ -8,6 +8,7 @@ import { IStringKeyedObject } from '@cyber-crafts/ltc-core/lib/contracts'
 import { names as mailNames } from 'ltc-plugin-mail'
 import { UserTC } from './schema'
 import { render } from 'ltc-plugin-templating/lib/utils'
+import { logger } from '@cyber-crafts/ltc-core/lib/utils/logging'
 import bcrypt = require('bcrypt')
 import jwt = require('jwt-simple')
 
@@ -134,19 +135,57 @@ export default (container: App): void => {
     type: 'AuthedUser!',
     args: { email: 'String!', password: 'String!' },
     resolve: async ({ obj, args, context, info }: ResolverResolveParams<App, any>): Promise<any> => {
+      const authConfigs = container.config().get('auth')
       let user: any = (await repository.find({ email: args.email }))[ 0 ]
       if (!user) {
+        const updateData: any = {
+          failedLoginAttempts: user.get('failedLoginAttempts') + 1,
+        }
+        if (authConfigs.maxAllowedFailedAttempts >= updateData.failedLoginAttempts) {
+          updateData.lockedUntil = addToDate(new Date(), authConfigs.lockOutPeriod, DateAdditionTypes.seconds)
+        }
+        user.set(updateData)
+        repository.update([ user ])
+          .catch(e => {
+            logger.error(e)
+          })
         throw new Error('can not find user')
       }
       if (user.data.status === 'banned') {
         throw new Error('This user is banned.')
       }
+      // if last updated + password expiration period > now throw an error
+      if (user.get('passwordExpiresAt') <= new Date()) {
+        throw new Error('This user password has expired.')
+      }
+      if (user.get('lockedUntil') > new Date()) {
+        throw new Error(`This user is locked out until ${user.get('lockedUntil')}`)
+      }
       let serializedUser: IStringKeyedObject = transform(user)
       return bcrypt.compare(args.password, serializedUser.password)
         .then((res: Boolean) => {
           if (res) {
+            user.set({
+              failedLoginAttempts: 0,
+            })
+            repository.update([ user ])
+              .catch(e => {
+                logger.error(e)
+              })
             return getAuthedUser(container, user)
           } else {
+            const updateData: any = {
+              failedLoginAttempts: user.get('failedLoginAttempts') + 1,
+            }
+            if (authConfigs.maxAllowedFailedAttempts >= updateData.failedLoginAttempts) {
+              const now = new Date()
+              updateData.lockedUntil = new Date(now.setSeconds(now.getSeconds() + authConfigs.lockOutPeriod))
+            }
+            user.set(updateData)
+            repository.update([ user ])
+              .catch(e => {
+                logger.error(e)
+              })
             throw new Error('Invalid credentials.')
           }
         })
@@ -192,9 +231,11 @@ export default (container: App): void => {
     type: 'User',
     args: { input: 'NewUser!' },
     resolve: async ({ obj, args, context, info }: ResolverResolveParams<App, any>): Promise<any> => {
+      const authConfigs = container.config().get('auth')
       const data = await dataToModel(args.input)
       data.permissions = []
       data.status = 'active'
+      data.passwordExpiresAt = addToDate(new Date(), authConfigs.passwordExpirationPeriod, DateAdditionTypes.days)
       let newUser = repository.parse(data)
       let validation = await newUser.selfValidate()
       if (validation.success) {
@@ -258,6 +299,7 @@ export default (container: App): void => {
     type: 'Boolean!',
     args: { id: 'ID!', oldPassword: 'String!', newPassword: 'String!' },
     resolve: async ({ obj, args, context, info }: ResolverResolveParams<App, any>): Promise<any> => {
+      const authConfigs = container.config().get('auth')
       const items = (await repository.findByIds([ args.id ]))
       if (items.length > 0) {
         const item: any = items[ 0 ]
@@ -265,7 +307,8 @@ export default (container: App): void => {
         if (!match) {
           throw new Error('Invalid credentials.')
         }
-        const data = merge(transform(items[ 0 ]), { password: args.newPassword })
+        const data: any = merge(transform(items[ 0 ]), { password: args.newPassword })
+        data.passwordExpiresAt = addToDate(new Date(), authConfigs.passwordExpirationPeriod, DateAdditionTypes.days)
         item.set(await dataToModel(data))
         if (await repository.update([ item ])) {
           return true
@@ -332,7 +375,6 @@ export default (container: App): void => {
             }
           })
           .catch((err: any) => {
-            console.log(err)
             throw new Error('Error sending verification email.')
           })
         // return transform(newPasswordReset)
@@ -383,6 +425,7 @@ export default (container: App): void => {
       const data = await dataToModel(args.input)
       data.permissions = []
       data.status = 'active'
+      data.passwordExpiresAt = addToDate(new Date(), authConfig.passwordExpirationPeriod, DateAdditionTypes.days)
       let newUser: any = repository.parse(data)
       let validation = await newUser.selfValidate()
       if (validation.success) {
