@@ -7,6 +7,7 @@ import { names as mongoNames } from 'ltc-plugin-mongo'
 import { Context } from 'c2v'
 // import { Permissions } from './modules/Permission'
 import { Users } from './modules/User'
+import { Roles } from './modules/Role'
 import { PasswordResets } from './modules/PasswordReset'
 import { initPermissions } from './auth/init-permissions'
 import userListener from './modules/User/listener'
@@ -19,6 +20,7 @@ export const names = {
   // AUTH_PERMISSIONS_REPOSITORY: Symbol(namer.resolve('auth', 'permissions', 'repository')),
   AUTH_PERMISSIONS_GRAPHQL_CONFIG: Symbol(namer.resolve('auth', 'permissions', 'config')),
   AUTH_USERS_REPOSITORY: Symbol(namer.resolve('auth', 'users', 'repository')),
+  AUTH_ROLES_REPOSITORY: Symbol(namer.resolve('auth', 'roles', 'repository')),
   AUTH_PASSWORD_RESET_REPOSITORY: Symbol(namer.resolve('auth', 'passwordResets', 'repository')),
 }
 
@@ -49,6 +51,10 @@ export default class implements contracts.IPlugin {
     const users = new Users(connection.getClient(), `users`)
     container.bind<Users>(names.AUTH_USERS_REPOSITORY).toConstantValue(users)
     Context.bind(names.AUTH_USERS_REPOSITORY, users)
+
+    const roles: any = new Roles(connection.getClient(), `roles`)
+    container.bind<Users>(names.AUTH_ROLES_REPOSITORY).toConstantValue(roles)
+    Context.bind(names.AUTH_ROLES_REPOSITORY, roles)
 
     const passwordResets = new PasswordResets(connection.getClient(), `passwordResets`)
     container.bind<PasswordResets>(names.AUTH_PASSWORD_RESET_REPOSITORY).toConstantValue(passwordResets)

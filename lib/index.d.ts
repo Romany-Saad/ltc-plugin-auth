@@ -6,6 +6,7 @@ import IGraphqlAuthConfig from './contracts/IGraphqlAuthConfig';
 export declare const names: {
     AUTH_PERMISSIONS_GRAPHQL_CONFIG: symbol;
     AUTH_USERS_REPOSITORY: symbol;
+    AUTH_ROLES_REPOSITORY: symbol;
     AUTH_PASSWORD_RESET_REPOSITORY: symbol;
 };
 export default class implements contracts.IPlugin {

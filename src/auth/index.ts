@@ -37,6 +37,10 @@ export default class Auth {
     const authConfig = this.app.config().get('auth')
     const defaultPermissions = authConfig.user.defaultPermissions
     const roles = authConfig.roles
+    const rolesRepo = this.app.get<AMongoDbRepository<any>>(names.AUTH_ROLES_REPOSITORY)
+    const dbRoles = await rolesRepo.find({}, 0)
+    const serializedDbRoles = dbRoles.map(role => role.serialize())
+    roles.push(...serializedDbRoles)
     if (defaultPermissions) {
       permissions.push(...defaultPermissions.map((p: any) => {
         return {

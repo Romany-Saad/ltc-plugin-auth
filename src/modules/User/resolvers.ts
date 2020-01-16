@@ -168,7 +168,7 @@ export default (container: App): void => {
       return getAuthedUser(container, user[ 0 ])
     },
   })
-
+/*
   UserTC.addResolver({
     name: 'getRoles',
     type: '[UserRole]!',
@@ -176,14 +176,14 @@ export default (container: App): void => {
       const roles = source.config().get('auth.roles')
       return roles || []
     },
-  })
+  })*/
 
   schemaComposer.Query.addFields({ getUser: UserTC.getResolver('getUser') })
   schemaComposer.Query.addFields({ getUsers: UserTC.getResolver('getUsers') })
   schemaComposer.Query.addFields({ countUsers: UserTC.getResolver('countUsers') })
   schemaComposer.Query.addFields({ login: UserTC.getResolver('login') })
   schemaComposer.Query.addFields({ checkToken: UserTC.getResolver('checkToken') })
-  schemaComposer.Query.addFields({ getRoles: UserTC.getResolver('getRoles') })
+  // schemaComposer.Query.addFields({ getRoles: UserTC.getResolver('getRoles') })
 
 
   // Mutations ===================================
