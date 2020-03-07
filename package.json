@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@cyber-crafts/ltc-core": "git+ssh://git@bitbucket.org/cyber-crafts/lattice-core.git",
+    "graphql-compose": "^7.14.0",
     "ltc-plugin-config": "git+ssh://git@bitbucket.org/cyber-crafts/ltc-plugin-config.git",
     "ltc-plugin-graphql": "git+ssh://git@bitbucket.org/cyber-crafts/ltc-plugin-graphql.git#semver:^2",
     "ltc-plugin-grecaptcha": "git+ssh://git@bitbucket.org/cyber-crafts/ltc-plugin-grecaptcha.git",

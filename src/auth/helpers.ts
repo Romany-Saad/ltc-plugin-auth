@@ -2,11 +2,13 @@ import App, { IStringKeyedObject } from '@cyber-crafts/ltc-core'
 
 const UrlPattern = require('url-pattern')
 
-export const graphQlDefaultAuth = (next: any) => (rp: any) => {
-  const endpoint = rp.info.fieldName
+export const graphQlDefaultAuth = (next: any) => (obj: any, args: any, context: any, info: any) => {
+
+  const endpoint = info.fieldName
+
   // check if user permissions has endpoint
-  if (rp.context.user && rp.context.user.permissions.find((p: any) => p.name === endpoint) != undefined) {
-    return next(rp)
+  if (context.user && context.user.permissions.find((p: any) => p.name === endpoint) != undefined) {
+    return next(obj, args, context, info)
   } else {
     throw new Error('permissions denied')
   }
