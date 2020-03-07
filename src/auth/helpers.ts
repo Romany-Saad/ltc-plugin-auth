@@ -14,8 +14,8 @@ export const graphQlDefaultAuth = (next: any) => (obj: any, args: any, context: 
   }
 }
 
-export const graphQlDefaultUnprotectedAuth = (next: any) => (rp: any) => {
-  return next(rp)
+export const graphQlDefaultUnprotectedAuth = (next: any) => (obj: any, args: any, context: any, info: any) => {
+  return next(obj, args, context, info)
 }
 
 export const restDefaultAuth = (route: string) => (req: any, res: any, next: any) => {
